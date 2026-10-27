@@ -1,0 +1,25 @@
+<Application x:Class="USBAnywhere.Server.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:USBAnywhere.Server"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="BgPrimary" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="BgSecondary" Color="#252526"/>
+        <SolidColorBrush x:Key="BgTertiary" Color="#323233"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#0E639C"/>
+        <SolidColorBrush x:Key="AccentHover" Color="#1177BB"/>
+        <SolidColorBrush x:Key="HighlightColor" Color="#E94560"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#DCDCDC"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#969696"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#3C3C3C"/>
+        <SolidColorBrush x:Key="StatusSuccess" Color="#89D185"/>
+        <SolidColorBrush x:Key="StatusWarning" Color="#CCA700"/>
+        <SolidColorBrush x:Key="StatusError" Color="#F14C4C"/>
+        <SolidColorBrush x:Key="StatusInfo" Color="#75BEFF"/>
+        <SolidColorBrush x:Key="DataGridBg" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="DataGridAltBg" Color="#252526"/>
+        <SolidColorBrush x:Key="DataGridHover" Color="#2A2D2E"/>
+        <SolidColorBrush x:Key="DataGridSelected" Color="#094771"/>
+    </Application.Resources>
+</Application>

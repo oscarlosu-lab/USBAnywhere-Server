@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- USBAnywhere Server - github.com/oscarlosu-lab/USBAnywhere-Server -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>USBAnywhere-Server</AssemblyName>
+    <RootNamespace>USBAnywhere.Server</RootNamespace>
+    <Version>3.0.0</Version>
+    <Company>oscarlosu-lab</Company>
+    <Authors>oscarlosu-lab</Authors>
+    <Copyright>Copyright (c) 2025-2026 oscarlosu-lab</Copyright>
+    <Product>USBAnywhere Server</Product>
+    <Description>USBAnywhere Server for Windows - Share local USB devices over LAN, Wi-Fi &amp; VPN</Description>
+    <RepositoryUrl>https://github.com/oscarlosu-lab/USBAnywhere-Server</RepositoryUrl>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- USB Device Management -->
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
+    <PackageReference Include="System.Management" Version="9.0.0" />
+    <!-- For SetupAPI USB enumeration -->
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\portable\drivers\**\*">
+      <Link>drivers\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,81 @@
+# ========================================
+# .gitignore - SnakeUSBIP-Server
+# (c) 2025-2026 oscarlosu-lab
+# ========================================
+
+# ============ RUTAS LOCALES / NUGET ============
+**/obj/**/*.json
+**/obj/**/*.dgspec.json
+**/obj/**/*.assets.json
+**/obj/**/project.assets.json
+*.nuget.dgspec.json
+*.sourcelink.json
+
+# ============ BUILD ARTIFACTS ============
+**/bin/
+**/obj/
+**/out/
+publish/
+release/
+*.pdb
+*.cache
+
+# Allow drivers in portable folder
+!portable/drivers/**
+!Portable/drivers/**
+
+# Ignore loose executables and libraries except bundled drivers
+*.exe
+*.dll
+!portable/drivers/*.exe
+!portable/drivers/*.dll
+!Portable/drivers/*.exe
+!Portable/drivers/*.dll
+
+# ============ LOGS ============
+*.log
+logs/
+
+# ============ OS FILES ============
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ============ IDE ============
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# ============ INTERNAL ============
+.agent/
+.gemini/
+backups/
+*_backup*
+
+# ============ TEMP ============
+*.tmp
+*.temp
+~$*
+
+# ============ SECRETS, CERTS & DRIVER SOURCES ============
+.env
+.env.local
+*.env
+*.pfx
+*.key
+*.pem
+*.cer
+*.crt
+*.p8
+*.p12
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+__pycache__/
+*.pyc
