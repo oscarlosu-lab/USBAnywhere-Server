@@ -14,8 +14,10 @@ namespace USBAnywhere.Server.Services;
 public static class FirewallService
 {
     private const string RuleName = "USBAnywhere Server (TCP 3240)";
+    private const string RuleNameUdp = "USBAnywhere Discovery (UDP 3241)";
     private const string LegacyRuleName = "SnakeUSBIP Server (TCP 3240)";
     private const int Port = 3240;
+    private const int DiscoveryPort = 3241;
 
     public static bool IsRuleConfigured()
     {
@@ -75,6 +77,8 @@ public static class FirewallService
 
             var inboundResult = await RunNetshCommandAsync(
                 $"advfirewall firewall add rule name=\"{RuleName}\" dir=in action=allow protocol=tcp localport={Port} profile=private,domain {remoteIpClause}");
+            await RunNetshCommandAsync(
+                $"advfirewall firewall add rule name=\"{RuleNameUdp}\" dir=in action=allow protocol=udp localport={DiscoveryPort} profile=private,domain {remoteIpClause}");
 
             if (!inboundResult)
             {
@@ -103,7 +107,8 @@ public static class FirewallService
 
             var r1 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{RuleName}\"");
             var r2 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{LegacyRuleName}\"");
-            var result = r1 || r2;
+            var r3 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{RuleNameUdp}\"");
+            var result = r1 || r2 || r3;
 
             if (result)
             {

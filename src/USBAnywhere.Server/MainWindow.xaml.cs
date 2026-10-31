@@ -32,6 +32,7 @@ public partial class MainWindow : Window
     private readonly UsbipdService _usbipdService;
     private readonly DriverInstaller _driverInstaller;
     private readonly UpdateService _updateService;
+    private readonly DiscoveryResponderService _discoveryService;
     private readonly LocalizationService _localization;
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<LocalUsbDevice> _deviceCollection = new();
@@ -55,6 +56,8 @@ public partial class MainWindow : Window
         _usbipdService = new UsbipdService();
         _driverInstaller = new DriverInstaller();
         _updateService = new UpdateService();
+        _discoveryService = new DiscoveryResponderService();
+        _discoveryService.Start();
         _localization = new LocalizationService();
 
         _currentLanguage = SettingsService.Current.Language ?? LocalizationService.DetectSystemLanguage();
@@ -899,6 +902,7 @@ public partial class MainWindow : Window
     {
         _refreshTimer.Stop();
         _usbipdService.Dispose();
+        _discoveryService.Dispose();
 
         if (_notifyIcon != null)
         {
