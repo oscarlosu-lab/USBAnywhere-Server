@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "USBAnywhereServerMac",
     platforms: [
-        .macOS(.v12)
+        .macOS(.v13)
     ],
     products: [
         .executable(
@@ -22,7 +22,10 @@ let package = Package(
             path: "Sources",
             linkerSettings: [
                 .linkedFramework("IOKit"),
-                .linkedFramework("CoreFoundation")
+                .linkedFramework("CoreFoundation"),
+                .linkedFramework("Network"),
+                .linkedFramework("AppKit"),
+                .linkedFramework("SwiftUI")
             ]
         ),
         .testTarget(

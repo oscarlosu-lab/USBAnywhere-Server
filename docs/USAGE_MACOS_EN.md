@@ -99,6 +99,20 @@ curl -fsSL https://raw.githubusercontent.com/oscarlosu-lab/USBAnywhere-Server/ma
 
 ---
 
+---
+
+## 🖥️ Native macOS GUI & Menu Bar App Architecture
+
+USBAnywhere Server for macOS includes both an interactive command-line interface / background LaunchDaemon and a native SwiftUI desktop interface:
+
+- **Top Status & IP Indicator**: Live server state with click-to-copy IP address badge and active port indicator (3240).
+- **Interactive Peripheral Cards**: Device cards displaying hardware classification badges (HID, Video, Audio, Serial), Bus IDs, `VID:PID`, speed ratings, and instant Share/Stop toggles.
+- **Auto-Bind Engine**: Automatically re-exports remembered USB peripherals by hardware signature whenever reconnected.
+- **Menu Bar Extra (`NSStatusItem`)**: Quick system tray controls to monitor shared devices, toggle all exports, and copy host IP directly from the macOS status bar.
+- **Multi-Tier Auto-Discovery**: Integrated UDP 3241 responder and Bonjour mDNS publishing (`_usbanywhere._tcp`) for zero-configuration discovery by Windows and Android clients.
+
+---
+
 ## 🛠️ Building from Source
 
 Requirements:

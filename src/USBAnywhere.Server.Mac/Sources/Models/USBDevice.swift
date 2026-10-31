@@ -20,7 +20,9 @@ public struct USBInterfaceInfo: Codable, Equatable {
     }
 }
 
-public final class USBDeviceInfo: Codable, CustomStringConvertible {
+public final class USBDeviceInfo: Codable, CustomStringConvertible, Identifiable, ObservableObject {
+    public var id: String { busId }
+
     public let busId: String
     public let path: String
     public let busNum: UInt32
@@ -95,6 +97,62 @@ public final class USBDeviceInfo: Codable, CustomStringConvertible {
         let mfg = manufacturer.map { "\($0) - " } ?? ""
         let hexId = String(format: "%04X:%04X", idVendor, idProduct)
         return "\(mfg)\(name) (\(hexId))"
+    }
+
+    public var vidPidString: String {
+        return String(format: "%04X:%04X", idVendor, idProduct)
+    }
+
+    public var category: String {
+        switch bDeviceClass {
+        case 0x01: return "Audio"
+        case 0x02: return "Communications"
+        case 0x03: return "HID / Gaming"
+        case 0x06: return "Imaging"
+        case 0x07: return "Printer"
+        case 0x08: return "Storage"
+        case 0x09: return "Hub"
+        case 0x0E: return "Video"
+        case 0xE0: return "Wireless"
+        default:
+            for iface in interfaces {
+                switch iface.interfaceClass {
+                case 0x01: return "Audio"
+                case 0x02: return "Communications"
+                case 0x03: return "HID / Gaming"
+                case 0x06: return "Imaging"
+                case 0x07: return "Printer"
+                case 0x08: return "Storage"
+                case 0x0E: return "Video"
+                case 0xE0: return "Wireless"
+                default: break
+                }
+            }
+            return "General USB"
+        }
+    }
+    
+    public var categoryEmoji: String {
+        switch category {
+        case "HID / Gaming": return "🎮"
+        case "Video": return "📷"
+        case "Audio": return "🎧"
+        case "Storage": return "💾"
+        case "Communications": return "🔌"
+        case "Printer": return "🖨️"
+        default: return "⚡"
+        }
+    }
+
+    public var speedLabel: String {
+        switch speed {
+        case 1: return "Low Speed (1.5 Mb/s)"
+        case 2: return "Full Speed (12 Mb/s)"
+        case 3: return "High Speed (480 Mb/s)"
+        case 4: return "SuperSpeed (5 Gb/s)"
+        case 5: return "SuperSpeed+ (10 Gb/s)"
+        default: return "USB (Standard)"
+        }
     }
     
     public var description: String {

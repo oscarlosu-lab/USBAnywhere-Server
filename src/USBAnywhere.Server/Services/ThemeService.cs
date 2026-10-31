@@ -4,7 +4,7 @@ using Media = System.Windows.Media;
 namespace USBAnywhere.Server.Services;
 
 /// <summary>
-/// Theme service - Light/Dark theme management using DynamicResource
+/// Theme service - Obsidian Precision (v3.2.0) / Light theme management using DynamicResource
 /// </summary>
 public static class ThemeService
 {
@@ -16,43 +16,44 @@ public static class ThemeService
 
         if (isLight)
         {
-            resources["BgPrimary"] = new Media.SolidColorBrush(ColorFromHex("#F5F5F5"));
+            resources["BgPrimary"] = new Media.SolidColorBrush(ColorFromHex("#F4F4F6"));
             resources["BgSecondary"] = new Media.SolidColorBrush(ColorFromHex("#FFFFFF"));
-            resources["BgTertiary"] = new Media.SolidColorBrush(ColorFromHex("#E8E8E8"));
-            resources["AccentColor"] = new Media.SolidColorBrush(ColorFromHex("#0078D4"));
-            resources["AccentHover"] = new Media.SolidColorBrush(ColorFromHex("#1A86D9"));
-            resources["HighlightColor"] = new Media.SolidColorBrush(ColorFromHex("#D83B01"));
-            resources["TextPrimary"] = new Media.SolidColorBrush(ColorFromHex("#1E1E1E"));
-            resources["TextSecondary"] = new Media.SolidColorBrush(ColorFromHex("#555555"));
-            resources["BorderColor"] = new Media.SolidColorBrush(ColorFromHex("#D1D1D1"));
-            resources["StatusSuccess"] = new Media.SolidColorBrush(ColorFromHex("#107C10"));
-            resources["StatusWarning"] = new Media.SolidColorBrush(ColorFromHex("#B7791F"));
-            resources["StatusError"] = new Media.SolidColorBrush(ColorFromHex("#C42B1C"));
-            resources["StatusInfo"] = new Media.SolidColorBrush(ColorFromHex("#0078D4"));
+            resources["BgTertiary"] = new Media.SolidColorBrush(ColorFromHex("#EAEAEF"));
+            resources["AccentColor"] = new Media.SolidColorBrush(ColorFromHex("#111827"));
+            resources["AccentHover"] = new Media.SolidColorBrush(ColorFromHex("#374151"));
+            resources["HighlightColor"] = new Media.SolidColorBrush(ColorFromHex("#EF4444"));
+            resources["TextPrimary"] = new Media.SolidColorBrush(ColorFromHex("#111827"));
+            resources["TextSecondary"] = new Media.SolidColorBrush(ColorFromHex("#6B7280"));
+            resources["BorderColor"] = new Media.SolidColorBrush(ColorFromHex("#E5E7EB"));
+            resources["StatusSuccess"] = new Media.SolidColorBrush(ColorFromHex("#16A34A"));
+            resources["StatusWarning"] = new Media.SolidColorBrush(ColorFromHex("#D97706"));
+            resources["StatusError"] = new Media.SolidColorBrush(ColorFromHex("#DC2626"));
+            resources["StatusInfo"] = new Media.SolidColorBrush(ColorFromHex("#4B5563"));
             resources["DataGridBg"] = new Media.SolidColorBrush(ColorFromHex("#FFFFFF"));
-            resources["DataGridAltBg"] = new Media.SolidColorBrush(ColorFromHex("#F4F6F8"));
-            resources["DataGridHover"] = new Media.SolidColorBrush(ColorFromHex("#E5F3FF"));
-            resources["DataGridSelected"] = new Media.SolidColorBrush(ColorFromHex("#CCE8FF"));
+            resources["DataGridAltBg"] = new Media.SolidColorBrush(ColorFromHex("#F9FAFB"));
+            resources["DataGridHover"] = new Media.SolidColorBrush(ColorFromHex("#F3F4F6"));
+            resources["DataGridSelected"] = new Media.SolidColorBrush(ColorFromHex("#E5E7EB"));
         }
         else
         {
-            resources["BgPrimary"] = new Media.SolidColorBrush(ColorFromHex("#1E1E1E"));
-            resources["BgSecondary"] = new Media.SolidColorBrush(ColorFromHex("#252526"));
-            resources["BgTertiary"] = new Media.SolidColorBrush(ColorFromHex("#323233"));
-            resources["AccentColor"] = new Media.SolidColorBrush(ColorFromHex("#0E639C"));
-            resources["AccentHover"] = new Media.SolidColorBrush(ColorFromHex("#1177BB"));
-            resources["HighlightColor"] = new Media.SolidColorBrush(ColorFromHex("#E94560"));
-            resources["TextPrimary"] = new Media.SolidColorBrush(ColorFromHex("#DCDCDC"));
-            resources["TextSecondary"] = new Media.SolidColorBrush(ColorFromHex("#969696"));
-            resources["BorderColor"] = new Media.SolidColorBrush(ColorFromHex("#3C3C3C"));
-            resources["StatusSuccess"] = new Media.SolidColorBrush(ColorFromHex("#89D185"));
-            resources["StatusWarning"] = new Media.SolidColorBrush(ColorFromHex("#CCA700"));
-            resources["StatusError"] = new Media.SolidColorBrush(ColorFromHex("#F14C4C"));
-            resources["StatusInfo"] = new Media.SolidColorBrush(ColorFromHex("#75BEFF"));
-            resources["DataGridBg"] = new Media.SolidColorBrush(ColorFromHex("#1E1E1E"));
-            resources["DataGridAltBg"] = new Media.SolidColorBrush(ColorFromHex("#252526"));
-            resources["DataGridHover"] = new Media.SolidColorBrush(ColorFromHex("#2A2D2E"));
-            resources["DataGridSelected"] = new Media.SolidColorBrush(ColorFromHex("#094771"));
+            // Obsidian Precision Dark Theme (v3.2.0)
+            resources["BgPrimary"] = new Media.SolidColorBrush(ColorFromHex("#0B0C0E"));
+            resources["BgSecondary"] = new Media.SolidColorBrush(ColorFromHex("#131417"));
+            resources["BgTertiary"] = new Media.SolidColorBrush(ColorFromHex("#16171B"));
+            resources["AccentColor"] = new Media.SolidColorBrush(ColorFromHex("#D2F800"));
+            resources["AccentHover"] = new Media.SolidColorBrush(ColorFromHex("#B8DA00"));
+            resources["HighlightColor"] = new Media.SolidColorBrush(ColorFromHex("#EF4444"));
+            resources["TextPrimary"] = new Media.SolidColorBrush(ColorFromHex("#EDEDED"));
+            resources["TextSecondary"] = new Media.SolidColorBrush(ColorFromHex("#8E919A"));
+            resources["BorderColor"] = new Media.SolidColorBrush(ColorFromHex("#22242A"));
+            resources["StatusSuccess"] = new Media.SolidColorBrush(ColorFromHex("#D2F800"));
+            resources["StatusWarning"] = new Media.SolidColorBrush(ColorFromHex("#F59E0B"));
+            resources["StatusError"] = new Media.SolidColorBrush(ColorFromHex("#EF4444"));
+            resources["StatusInfo"] = new Media.SolidColorBrush(ColorFromHex("#A1A1AA"));
+            resources["DataGridBg"] = new Media.SolidColorBrush(ColorFromHex("#0B0C0E"));
+            resources["DataGridAltBg"] = new Media.SolidColorBrush(ColorFromHex("#131417"));
+            resources["DataGridHover"] = new Media.SolidColorBrush(ColorFromHex("#18191E"));
+            resources["DataGridSelected"] = new Media.SolidColorBrush(ColorFromHex("#22242A"));
         }
     }
 

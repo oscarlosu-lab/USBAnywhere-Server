@@ -12,7 +12,7 @@ Una suite de servidor de escritorio unificada que combina:
 
 Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.1.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -26,6 +26,7 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 ## ✨ Características Principales
 
 - 🖥️ **Soporte de Servidor Windows y 🍎 macOS** — Comparte periféricos desde tu PC Windows o tu Mac hacia cualquier cliente de red local, Wi-Fi o VPN.
+- 📡 **Auto-Descubrimiento Multi-Nivel** — Respondedor nativo UDP 3241 y difusión de servicio Zeroconf mDNS para localización instantánea desde clientes Windows y Android.
 - 🎮 **Ideal para Joysticks, SimRacing y Gaming** — Reenvía palancas de vuelo, volantes, mandos, tarjetas de sonido/DAC y adaptadores serie con mínima latencia.
 - 🔧 **Cero Configuración en Windows** — Instalación automatizada de drivers oficiales `usbipd-win` en el primer arranque.
 - ⚡ **Auto-Instalación en 1 Clic en macOS** — Script automatizado vía curl/bash que compila e instala el demonio Swift con servicio en segundo plano `LaunchDaemon`.
@@ -38,7 +39,7 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 
 ## 🚀 Inicio Rápido — Servidor Windows
 
-1. Descarga `USBAnywhere-Server_Setup_v3.0.0.exe` o el archivo ZIP portable desde [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0).
+1. Descarga `USBAnywhere-Server_Setup_v3.1.0.exe` o el archivo ZIP portable desde [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.1.0).
 2. Ejecuta `USBAnywhere-Server.exe` como Administrador.
 3. Haz clic en **📤 Compartir** en cualquier periférico (o en **⚡ Compartir Todo**).
 4. Haz clic en la **etiqueta verde con la IP** en la barra superior para copiar la dirección de tu servidor.

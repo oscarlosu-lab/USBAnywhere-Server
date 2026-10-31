@@ -25,10 +25,11 @@
 ### 3. Client can't see or connect to the server
 
 **Solutions**:
-1. Open **⚙️ Settings** in USBAnywhere Server and click **🛡️ Configure Firewall** to open TCP port 3240
+1. Open **⚙️ Settings** in USBAnywhere Server and click **🛡️ Configure Firewall** to open both TCP port 3240 (USB/IP) and UDP port 3241 (Auto-Scan Discovery)
 2. Or run in Administrator PowerShell:
    ```powershell
    New-NetFirewallRule -DisplayName "USBAnywhere Server (TCP 3240)" -Direction Inbound -Protocol TCP -LocalPort 3240 -Action Allow
+   New-NetFirewallRule -DisplayName "USBAnywhere Discovery (UDP 3241)" -Direction Inbound -Protocol UDP -LocalPort 3241 -Action Allow
    ```
 3. Verify the device shows `Shared` status in USBAnywhere Server
 

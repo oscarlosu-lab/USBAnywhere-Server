@@ -12,7 +12,7 @@ A unified desktop server suite combining:
 
 Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.1.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -26,6 +26,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 ## ✨ Features
 
 - 🖥️ **Windows & 🍎 macOS Server Support** — Share devices from either Windows or Mac across your LAN, Wi-Fi, or VPN.
+- 📡 **Multi-Tier Auto-Discovery** — Native UDP 3241 discovery responder and mDNS Zeroconf service advertising so clients find servers in milliseconds.
 - 🎮 **Perfect for Joysticks, SimRacing & Gaming** — Forward flight sticks, racing wheels, gamepads, DACs, and serial adapters with minimal latency.
 - 🔧 **Zero Configuration on Windows** — Auto-installs official `usbipd-win` drivers on first run.
 - ⚡ **1-Click Auto-Setup on macOS** — Automated curl/bash script sets up universal Swift daemon with LaunchDaemon persistence.
@@ -38,7 +39,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ## 🚀 Quick Start — Windows Server
 
-1. Download `USBAnywhere-Server_Setup_v3.0.0.exe` or the portable ZIP from [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0).
+1. Download `USBAnywhere-Server_Setup_v3.1.0.exe` or the portable ZIP from [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.1.0).
 2. Run `USBAnywhere-Server.exe` as Administrator.
 3. Click **📤 Share** on any device (or **⚡ Share All**).
 4. Click the green **IP badge** in the header to copy your server IP address.

@@ -25,10 +25,11 @@
 ### 3. El cliente no detecta ni se conecta al servidor
 
 **Soluciones**:
-1. Abrir **⚙️ Configuración** en USBAnywhere Server y pulsar **🛡️ Configurar Firewall** para habilitar el puerto TCP 3240.
+1. Abrir **⚙️ Configuración** en USBAnywhere Server y pulsar **🛡️ Configurar Firewall** para habilitar los puertos TCP 3240 (USB/IP) y UDP 3241 (Auto-Descubrimiento).
 2. O ejecutar en PowerShell como Administrador:
    ```powershell
    New-NetFirewallRule -DisplayName "USBAnywhere Server (TCP 3240)" -Direction Inbound -Protocol TCP -LocalPort 3240 -Action Allow
+   New-NetFirewallRule -DisplayName "USBAnywhere Discovery (UDP 3241)" -Direction Inbound -Protocol UDP -LocalPort 3241 -Action Allow
    ```
 3. Verificar que el dispositivo aparezca en estado `Compartido` en la interfaz.
 

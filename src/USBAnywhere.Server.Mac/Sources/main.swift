@@ -1,19 +1,22 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// USBAnywhere Server for macOS - Main CLI Entry Point
+// USBAnywhere Server for macOS - Main CLI Entry Point & GUI Launcher
 // Copyright (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere-Server
 // Licensed under GPL v3
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Foundation
+#if canImport(SwiftUI)
+import SwiftUI
+#endif
 
-let version = "3.0.1"
+let version = "3.1.0"
 
 func printBanner() {
     print("""
-    ╔══════════════════════════════════════════════════════════════════════╗
+    ╔═══════════════════════════════════════════════════════════════════════════╗
     ║       🌐 USBAnywhere Server for macOS v\(version)                      ║
-    ║   Share local USB peripherals over network (Moonlight/Sunshine/Sim)  ║
-    ╚══════════════════════════════════════════════════════════════════════╝
+    ║   Share local USB peripherals over network (Moonlight/Sunshine/Sim)       ║
+    ╚═══════════════════════════════════════════════════════════════════════════╝
     """)
 }
 
@@ -21,13 +24,14 @@ func printHelp() {
     printBanner()
     print("""
     USAGE:
-      usbanywhere-server-mac <command> [options]
+      usbanywhere-server-mac [command] [options]
 
     COMMANDS:
+      gui, (no args)             Launch native macOS SwiftUI Dashboard & Menu Bar Extra
       list                       List connected USB devices and their bus IDs
       bind <busid>               Bind and export a USB device (e.g. 1-1)
       unbind <busid>             Unbind a shared USB device
-      serve [options]            Start USB/IP server daemon
+      serve [options]            Start USB/IP server daemon in terminal
       control, dashboard         Open interactive Control Suite dashboard
       install-service            Install and start background launchd service (sudo)
       uninstall-service          Stop and remove background launchd service (sudo)
@@ -39,18 +43,31 @@ func printHelp() {
       --auto-bind                Automatically export all local USB devices (except Hubs)
 
     EXAMPLES:
-      usbanywhere-server-mac list
-      usbanywhere-server-mac bind 1-1
-      usbanywhere-server-mac serve --auto-bind
+      usbanywhere-server-mac                     # Launch GUI Desktop App
+      usbanywhere-server-mac list                # List USB peripherals
+      usbanywhere-server-mac bind 1-1            # Bind peripheral on bus 1-1
+      usbanywhere-server-mac serve --auto-bind   # Headless CLI server daemon
       sudo usbanywhere-server-mac install-service
     """)
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
 
-guard !args.isEmpty else {
+// If launched with no arguments or with gui/--gui, launch native macOS SwiftUI application
+if args.isEmpty || args.contains("--gui") || args.first == "gui" {
+    #if canImport(SwiftUI)
+    if #available(macOS 13.0, *) {
+        USBAnywhereServerApp.main()
+        exit(0)
+    } else {
+        print("Notice: Native SwiftUI GUI requires macOS 13.0 or later.")
+        printHelp()
+        exit(0)
+    }
+    #else
     printHelp()
     exit(0)
+    #endif
 }
 
 let command = args[0].lowercased()
