@@ -203,7 +203,7 @@ public struct SettingsView: View {
 
     private func loadSettings() {
         portString = "\(vm.serverPort)"
-        autoBoundList = AutoBindManager.shared.getAutoBoundList()
+        autoBoundList = Array(AutoBindManager.shared.getAutoBoundList()).sorted()
         let plistPath = "/Library/LaunchDaemons/com.usbanywhere.server.plist"
         isLaunchdInstalled = FileManager.default.fileExists(atPath: plistPath)
     }

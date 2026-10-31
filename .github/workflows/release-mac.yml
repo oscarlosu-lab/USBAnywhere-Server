@@ -1,0 +1,53 @@
+name: Release macOS Server Universal Binary
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+      - 'server-mac-*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-mac:
+    name: Build Native macOS Universal Binary & Attach to Release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile Native Swift Server Daemon & GUI (Release)
+        run: |
+          cd src/USBAnywhere.Server.Mac
+          swift build -c release
+          swift test
+
+      - name: Package Universal Binary & Tarball
+        run: |
+          cd src/USBAnywhere.Server.Mac
+          mkdir -p ../../dist
+          cp .build/release/usbanywhere-server-mac ../../dist/
+          cd ../../dist
+          chmod +x usbanywhere-server-mac
+          tar -czvf USBAnywhere-Server-macOS-v3.2.0.tar.gz usbanywhere-server-mac
+          zip -9 USBAnywhere-Server-macOS-v3.2.0.zip usbanywhere-server-mac
+          shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.2.0.tar.gz USBAnywhere-Server-macOS-v3.2.0.zip > SHA256SUMS-macOS.txt
+
+      - name: Upload Artifacts to Workflow Run
+        uses: actions/upload-artifact@v4
+        with:
+          name: USBAnywhere-Server-macOS-v3.2.0
+          path: dist/*
+
+      - name: Publish to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_TAG="v3.2.0"
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+            RELEASE_TAG="${{ github.ref_name }}"
+          fi
+          gh release upload "${RELEASE_TAG}" dist/* --clobber || gh release create "${RELEASE_TAG}" dist/* --title "USBAnywhere Server ${RELEASE_TAG}" --notes "Official macOS release binary (Universal Apple Silicon & Intel)." || true

@@ -66,6 +66,22 @@ jobs:
           python3 scripts/usbanywhere-ctl doctor
           python3 scripts/usbanywhere-ctl status
 
+      - name: Package macOS Universal Binary
+        run: |
+          cd src/USBAnywhere.Server.Mac
+          mkdir -p ../../dist
+          cp .build/release/usbanywhere-server-mac ../../dist/
+          cd ../../dist
+          chmod +x usbanywhere-server-mac
+          tar -czvf USBAnywhere-Server-macOS-v3.2.0.tar.gz usbanywhere-server-mac
+          shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.2.0.tar.gz > SHA256SUMS-macOS.txt
+
+      - name: Upload macOS Server Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: USBAnywhere-Server-macOS-v3.2.0
+          path: dist/*
+
   build-and-test-linux:
     name: Control Suite & Integration Tests (Linux Ubuntu)
     runs-on: ubuntu-latest

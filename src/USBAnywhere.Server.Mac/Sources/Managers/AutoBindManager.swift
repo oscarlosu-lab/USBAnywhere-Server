@@ -34,6 +34,11 @@ public final class AutoBindManager {
         return rememberedVidPids
     }
 
+    public func clearAll() {
+        rememberedVidPids.removeAll()
+        save()
+    }
+
     private func load() {
         if let array = UserDefaults.standard.stringArray(forKey: userDefaultsKey) {
             rememberedVidPids = Set(array.map { $0.uppercased() })
