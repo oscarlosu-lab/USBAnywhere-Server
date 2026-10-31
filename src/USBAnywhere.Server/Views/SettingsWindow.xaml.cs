@@ -42,6 +42,8 @@ public partial class SettingsWindow : Window
         secAutoBind.Text = _localization.GetText("sec_autobind", _currentLanguage);
         chkAutoBind.Content = _localization.GetText("chk_autobind", _currentLanguage);
         txtAutoBindDesc.Text = _localization.GetText("desc_autobind", _currentLanguage);
+        chkAutoUnbind.Content = _localization.GetText("chk_autounbind", _currentLanguage);
+        txtAutoUnbindDesc.Text = _localization.GetText("desc_autounbind", _currentLanguage);
 
         secSecurity.Text = _localization.GetText("sec_security", _currentLanguage);
         chkWhitelist.Content = _localization.GetText("chk_whitelist", _currentLanguage);
@@ -72,6 +74,7 @@ public partial class SettingsWindow : Window
         chkCheckUpdates.IsChecked = settings.CheckForUpdates;
 
         chkAutoBind.IsChecked = settings.AutoBindEnabled;
+        chkAutoUnbind.IsChecked = settings.AutoUnbindOnDisconnect;
 
         chkWhitelist.IsChecked = settings.WhitelistEnabled;
 
@@ -90,6 +93,7 @@ public partial class SettingsWindow : Window
         settings.CheckForUpdates = chkCheckUpdates.IsChecked ?? true;
 
         settings.AutoBindEnabled = chkAutoBind.IsChecked ?? false;
+        settings.AutoUnbindOnDisconnect = chkAutoUnbind.IsChecked ?? true;
 
         settings.WhitelistEnabled = chkWhitelist.IsChecked ?? false;
 

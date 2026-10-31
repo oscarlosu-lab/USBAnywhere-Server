@@ -2,7 +2,7 @@
 # Automates the release process for USBAnywhere Server v3.0.0
 # (c) 2025-2026 oscarlosu-lab - Protocolo Omega
 
-$version = "3.0.0"
+$version = "3.1.0"
 $repoRoot = $PSScriptRoot
 $projectPath = Join-Path $repoRoot "src\USBAnywhere.Server"
 $releasePath = Join-Path $repoRoot "release"

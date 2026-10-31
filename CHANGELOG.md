@@ -1,5 +1,17 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.1.0] - 2026-10-31
+
+### Added
+- **Auto-Unbind on Disconnect (`AutoUnbindOnDisconnect`)**:
+  - Automatically unbinds shared USB devices when the remote client disconnects (`Attached` -> `Shared` transition), releasing them back to the host Windows machine's native device stack (XInput/HID/DirectInput).
+  - Configurable toggle in Settings UI and persisted in `AppSettings.json`.
+- **Linux Dynamic Daemon & Sysfs Auto-Release Synchronization**:
+  - Synchronized `scripts/usbanywhere-ctl` and `scripts/install-server-linux.sh` across server repositories.
+  - Added sysfs `usbip_status` watcher (releasing devices when remote client detaches) and dynamic control socket on TCP port 3241.
+
+---
+
 ## [3.0.1] - 2026-10-26
 
 ### Added

@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** [English](README.md) | **Español**
 
-**v3.0.1** | [🌍 Sitio Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [Descargar Última Versión](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 Cliente USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [📖 Manual Windows](docs/USAGE_ES.md) | [🍎 Manual macOS](docs/USAGE_MACOS_ES.md) | [🛠️ Solución de Problemas](docs/TROUBLESHOOTING_ES.md)
+**v3.1.0** | [🌍 Sitio Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y Descargas](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 Cliente USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [📖 Manual Windows](docs/USAGE_ES.md) | [🍎 Manual macOS](docs/USAGE_MACOS_ES.md) | [🛠️ Solución de Problemas](docs/TROUBLESHOOTING_ES.md)
 
 **Comparte periféricos USB locales desde PCs Windows y Apple Macs a través de tu red doméstica o VPN.**
 
@@ -12,7 +12,7 @@ Una suite de servidor de escritorio unificada que combina:
 
 Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Server/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -38,7 +38,7 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 
 ## 🚀 Inicio Rápido — Servidor Windows
 
-1. Descarga `USBAnywhere-Server_Setup_v3.0.1.exe` o el archivo ZIP portable desde [Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest).
+1. Descarga `USBAnywhere-Server_Setup_v3.0.0.exe` o el archivo ZIP portable desde [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0).
 2. Ejecuta `USBAnywhere-Server.exe` como Administrador.
 3. Haz clic en **📤 Compartir** en cualquier periférico (o en **⚡ Compartir Todo**).
 4. Haz clic en la **etiqueta verde con la IP** en la barra superior para copiar la dirección de tu servidor.

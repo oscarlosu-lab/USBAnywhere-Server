@@ -18,9 +18,10 @@ public class AppSettings
     public string Theme { get; set; } = "dark";
     public string Language { get; set; } = "";
 
-    // AUTO-BIND
+    // AUTO-BIND & DYNAMIC UNBIND
     public bool AutoBindEnabled { get; set; } = false;
     public List<string> AutoBindDevices { get; set; } = new();
+    public bool AutoUnbindOnDisconnect { get; set; } = true;
 
     // SECURITY
     public bool WhitelistEnabled { get; set; } = false;

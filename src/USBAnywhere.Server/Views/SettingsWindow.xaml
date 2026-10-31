@@ -78,10 +78,14 @@
                 <CheckBox x:Name="chkShowNotifications" Content="Show balloon notifications"/>
                 <CheckBox x:Name="chkCheckUpdates" Content="Check for updates on startup"/>
                 
-                <!-- AUTO-BIND -->
-                <TextBlock x:Name="secAutoBind" Text="🔗 AUTO-BIND (Persistent USB Sharing)" Style="{StaticResource SectionHeader}"/>
+                <!-- AUTO-BIND & DYNAMIC UNBIND -->
+                <TextBlock x:Name="secAutoBind" Text="🔗 AUTO-BIND &amp; DYNAMIC UNBIND" Style="{StaticResource SectionHeader}"/>
                 <CheckBox x:Name="chkAutoBind" Content="Enable Auto-Bind for shared devices"/>
                 <TextBlock x:Name="txtAutoBindDesc" Text="When enabled, devices you share will automatically be re-shared whenever they are plugged in." 
+                           FontSize="10" Foreground="{DynamicResource TextSecondary}" 
+                           TextWrapping="Wrap" Margin="20,0,0,0"/>
+                <CheckBox x:Name="chkAutoUnbind" Content="Auto-unbind on client disconnect (Release to local PC)"/>
+                <TextBlock x:Name="txtAutoUnbindDesc" Text="When enabled, releases the device back to the local operating system immediately after the remote client disconnects." 
                            FontSize="10" Foreground="{DynamicResource TextSecondary}" 
                            TextWrapping="Wrap" Margin="20,0,0,0"/>
                 

@@ -36,6 +36,8 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<LocalUsbDevice> _deviceCollection = new();
     private readonly HashSet<string> _autoBindingBusIds = new();
+    private readonly HashSet<string> _autoUnbindingBusIds = new();
+    private readonly Dictionary<string, string> _previousDeviceStatuses = new();
     private readonly List<ServerLogEntry> _logHistory = new();
     private WinForms.NotifyIcon? _notifyIcon;
     private WinForms.ToolStripMenuItem? _trayOpenItem;
@@ -340,6 +342,41 @@ public partial class MainWindow : Window
                 {
                     _deviceCollection.Add(dev);
                 }
+
+                // Auto-Unbind on client disconnect
+                if (SettingsService.Current.AutoUnbindOnDisconnect &&
+                    _previousDeviceStatuses.TryGetValue(dev.BusId, out var prevStatus) &&
+                    !_autoUnbindingBusIds.Contains(dev.BusId))
+                {
+                    bool wasAttached = prevStatus.StartsWith("Attached", StringComparison.OrdinalIgnoreCase);
+                    bool isNowSharedIdle = dev.IsExported && (dev.Status.Equals("Shared", StringComparison.OrdinalIgnoreCase) || dev.Status.Contains("forced", StringComparison.OrdinalIgnoreCase));
+
+                    if (wasAttached && isNowSharedIdle)
+                    {
+                        _autoUnbindingBusIds.Add(dev.BusId);
+                        AddLocalizedLog("log_autounbind_trigger", dev.DisplayName, dev.BusId);
+                        NotificationService.ShowToast(
+                            _localization.GetText("title", _currentLanguage),
+                            _localization.GetFormattedText("log_autounbind_trigger", _currentLanguage, dev.DisplayName, dev.BusId),
+                            NotificationType.Info,
+                            _notifyIcon);
+
+                        var busIdToUnbind = dev.BusId;
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await _usbipdService.UnbindDeviceAsync(busIdToUnbind);
+                            }
+                            finally
+                            {
+                                Dispatcher.Invoke(() => _autoUnbindingBusIds.Remove(busIdToUnbind));
+                            }
+                        });
+                    }
+                }
+
+                _previousDeviceStatuses[dev.BusId] = dev.Status;
 
                 if (SettingsService.Current.AutoBindEnabled &&
                     dev.IsNotShared &&

@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.0.1** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [Download Latest](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
+**v3.1.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
 
 **Share local USB peripherals from Windows PCs and Apple Macs over your network — Zero hassle.**
 
@@ -12,7 +12,7 @@ A unified desktop server suite combining:
 
 Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Server/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -38,7 +38,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ## 🚀 Quick Start — Windows Server
 
-1. Download `USBAnywhere-Server_Setup_v3.0.1.exe` or portable ZIP from [Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest).
+1. Download `USBAnywhere-Server_Setup_v3.0.0.exe` or the portable ZIP from [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.0.0).
 2. Run `USBAnywhere-Server.exe` as Administrator.
 3. Click **📤 Share** on any device (or **⚡ Share All**).
 4. Click the green **IP badge** in the header to copy your server IP address.

@@ -19,6 +19,8 @@ public class LocalizationServiceTests
     [InlineData("es", "status_running", "Servidor activo en puerto 3240 (usbipd corriendo)")]
     [InlineData("es", "settings_title", "⚙️ Ajustes - USBAnywhere Server")]
     [InlineData("es", "chk_autobind", "Activar Auto-Bind para dispositivos compartidos")]
+    [InlineData("es", "chk_autounbind", "Liberar dispositivo al desconectar el cliente (Auto-Unbind)")]
+    [InlineData("en", "chk_autounbind", "Auto-unbind on client disconnect (Release to local PC)")]
     [InlineData("en", "title", "USBAnywhere Server")]
     [InlineData("en", "btn_share", "📤 Share")]
     [InlineData("en", "btn_stop", "🚫 Stop")]
