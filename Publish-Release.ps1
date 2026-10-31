@@ -1,6 +1,6 @@
 # Publish-Release.ps1
-# Automates the release process for USBAnywhere Server v3.0.0
-# (c) 2025-2026 oscarlosu-lab - Protocolo Omega
+# Automates the release process for USBAnywhere Server v3.1.0
+# (c) 2025-2026 oscarlosu-lab
 
 $version = "3.1.0"
 $repoRoot = $PSScriptRoot
