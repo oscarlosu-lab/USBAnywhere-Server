@@ -25,10 +25,6 @@ public final class DiscoveryResponder {
 
         var yes: Int32 = 1
         setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &yes, socklen_t(MemoryLayout<Int32>.size))
-        #if os(macOS)
-        var reusePort: Int32 = 1
-        setsockopt(socketFd, SOL_SOCKET, SO_REUSEPORT, &reusePort, socklen_t(MemoryLayout<Int32>.size))
-        #endif
 
         var addr = sockaddr_in()
         addr.sin_family = sa_family_t(AF_INET)

@@ -62,14 +62,15 @@ public class LocalUsbDeviceTests
     [Fact]
     public async Task DiscoveryResponderService_TcpAndUdpControlApi_RespondsValidJson()
     {
-        using var service = new DiscoveryResponderService();
+        using var service = new DiscoveryResponderService(port: 13241);
         service.Start();
+        var activePort = service.Port;
         await Task.Delay(100);
 
-        // Test TCP 3241 STATUS
+        // Test TCP STATUS
         using (var tcp = new TcpClient())
         {
-            await tcp.ConnectAsync(IPAddress.Loopback, 3241);
+            await tcp.ConnectAsync(IPAddress.Loopback, activePort);
             var stream = tcp.GetStream();
             var cmd = Encoding.UTF8.GetBytes("STATUS\n");
             await stream.WriteAsync(cmd, 0, cmd.Length);
@@ -80,10 +81,10 @@ public class LocalUsbDeviceTests
             Assert.Contains("\"platform\":\"windows\"", json);
         }
 
-        // Test TCP 3241 LIST
+        // Test TCP LIST
         using (var tcp = new TcpClient())
         {
-            await tcp.ConnectAsync(IPAddress.Loopback, 3241);
+            await tcp.ConnectAsync(IPAddress.Loopback, activePort);
             var stream = tcp.GetStream();
             var cmd = Encoding.UTF8.GetBytes("LIST\n");
             await stream.WriteAsync(cmd, 0, cmd.Length);

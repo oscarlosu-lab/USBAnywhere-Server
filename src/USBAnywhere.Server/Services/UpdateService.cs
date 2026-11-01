@@ -126,10 +126,17 @@ public class UpdateService
             if (string.IsNullOrEmpty(sha256SumsUrl))
                 return new OperationResult { Success = false, Error = "Missing SHA256SUMS.txt verification URL (fail-closed)" };
 
+            if (!Uri.TryCreate(sha256SumsUrl, UriKind.Absolute, out var sumsUri) || sumsUri.Scheme != Uri.UriSchemeHttps)
+                return new OperationResult { Success = false, Error = "HTTPS SHA256SUMS URL required" };
+
+            if (!allowedHosts.Any(h => sumsUri.Host.Equals(h, StringComparison.OrdinalIgnoreCase) || sumsUri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase)))
+                return new OperationResult { Success = false, Error = $"Untrusted SHA256SUMS host: {sumsUri.Host}" };
+
             using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
             client.DefaultRequestHeaders.Add("User-Agent", "USBAnywhere-Server");
 
-            var tempDir = Path.GetTempPath();
+            var tempDir = Path.Combine(Path.GetTempPath(), $"USBAnywhereSrv_Upd_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(tempDir);
             var packagePath = Path.Combine(tempDir, installerName);
 
             var data = await client.GetByteArrayAsync(downloadUrl);

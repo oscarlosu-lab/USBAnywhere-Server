@@ -135,6 +135,11 @@ public static class SettingsService
                 lock (_lock)
                 {
                     _current = settings;
+                    _current.WhitelistedIPs = (_current.WhitelistedIPs ?? new List<string>())
+                        .Where(ip => !string.IsNullOrWhiteSpace(ip) && System.Text.RegularExpressions.Regex.IsMatch(ip.Trim(), @"^[0-9a-fA-F:./]+$"))
+                        .Select(ip => ip.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
                 }
                 Save();
                 LogService.Info($"Settings imported from: {filePath}");

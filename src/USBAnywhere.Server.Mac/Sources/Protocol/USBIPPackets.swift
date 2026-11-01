@@ -179,7 +179,7 @@ public enum USBIPPackets {
             }
             
             var payload = Data()
-            if direction == USBIPConstants.dirOut && transferBufferLength > 0 {
+            if direction == USBIPConstants.dirOut && transferBufferLength > 0 && buf.remainingBytes >= Int(transferBufferLength) {
                 guard let data = buf.readData(length: Int(transferBufferLength)) else {
                     return nil
                 }

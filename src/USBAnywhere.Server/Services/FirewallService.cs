@@ -5,6 +5,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 using System.Diagnostics;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace USBAnywhere.Server.Services;
 
@@ -18,6 +20,7 @@ public static class FirewallService
     private const string LegacyRuleName = "SnakeUSBIP Server (TCP 3240)";
     private const int Port = 3240;
     private const int DiscoveryPort = 3241;
+    private static readonly string NetshPath = Path.Combine(Environment.SystemDirectory, "netsh.exe");
 
     public static bool IsRuleConfigured()
     {
@@ -30,7 +33,7 @@ public static class FirewallService
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "netsh",
+                FileName = NetshPath,
                 Arguments = $"advfirewall firewall show rule name=\"{ruleName}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -41,9 +44,15 @@ public static class FirewallService
             using var process = Process.Start(psi);
             if (process == null) return false;
 
-            var output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit(5000);
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            if (!process.WaitForExit(5000))
+            {
+                try { process.Kill(entireProcessTree: true); } catch { }
+                return false;
+            }
 
+            if (process.ExitCode != 0) return false;
+            var output = outputTask.GetAwaiter().GetResult();
             return output.Contains(ruleName, StringComparison.OrdinalIgnoreCase);
         }
         catch
@@ -64,11 +73,24 @@ public static class FirewallService
             string remoteIpClause;
             if (!string.IsNullOrWhiteSpace(allowedIps))
             {
-                remoteIpClause = $"remoteip=\"{allowedIps}\"";
+                var validIps = allowedIps
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(ip => ip.Trim())
+                    .Where(ip => Regex.IsMatch(ip, @"^[0-9a-fA-F:./]+$"))
+                    .ToList();
+                remoteIpClause = validIps.Count > 0
+                    ? $"remoteip=\"{string.Join(",", validIps)}\""
+                    : "remoteip=127.0.0.1";
             }
-            else if (SettingsService.Current.WhitelistEnabled && SettingsService.Current.WhitelistedIPs.Any())
+            else if (SettingsService.Current.WhitelistEnabled)
             {
-                remoteIpClause = $"remoteip=\"{string.Join(",", SettingsService.Current.WhitelistedIPs)}\"";
+                var validIps = SettingsService.Current.WhitelistedIPs
+                    .Where(ip => !string.IsNullOrWhiteSpace(ip) && Regex.IsMatch(ip.Trim(), @"^[0-9a-fA-F:./]+$"))
+                    .Select(ip => ip.Trim())
+                    .ToList();
+                remoteIpClause = validIps.Count > 0
+                    ? $"remoteip=\"{string.Join(",", validIps)}\""
+                    : "remoteip=127.0.0.1";
             }
             else
             {
@@ -132,7 +154,7 @@ public static class FirewallService
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "netsh",
+                FileName = NetshPath,
                 Arguments = arguments,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,

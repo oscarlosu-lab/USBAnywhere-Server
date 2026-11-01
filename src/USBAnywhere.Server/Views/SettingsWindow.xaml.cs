@@ -77,6 +77,7 @@ public partial class SettingsWindow : Window
         chkAutoUnbind.IsChecked = settings.AutoUnbindOnDisconnect;
 
         chkWhitelist.IsChecked = settings.WhitelistEnabled;
+        txtWhitelistedIPs.Text = string.Join(", ", settings.WhitelistedIPs);
 
         UpdateFirewallStatus(FirewallService.IsRuleConfigured() || settings.FirewallConfigured);
 
@@ -96,6 +97,12 @@ public partial class SettingsWindow : Window
         settings.AutoUnbindOnDisconnect = chkAutoUnbind.IsChecked ?? true;
 
         settings.WhitelistEnabled = chkWhitelist.IsChecked ?? false;
+        settings.WhitelistedIPs = (txtWhitelistedIPs.Text ?? "")
+            .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ip => ip.Trim())
+            .Where(ip => !string.IsNullOrEmpty(ip) && System.Text.RegularExpressions.Regex.IsMatch(ip, @"^[0-9a-fA-F:./]+$"))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         if (int.TryParse(txtRefreshInterval.Text, out int interval) && interval >= 1 && interval <= 60)
         {

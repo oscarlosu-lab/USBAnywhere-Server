@@ -26,15 +26,18 @@ public partial class App : System.Windows.Application
 
         if (!createdNew)
         {
-            string sysLang = LocalizationService.DetectSystemLanguage();
-            string singleInstanceMsg = sysLang == "es"
-                ? "USBAnywhere Server ya se encuentra en ejecución."
-                : "USBAnywhere Server is already running.";
-            System.Windows.MessageBox.Show(
-                singleInstanceMsg,
-                "USBAnywhere Server",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
+            if (!e.Args.Any(a => a.Equals("--minimized", StringComparison.OrdinalIgnoreCase)))
+            {
+                string sysLang = LocalizationService.DetectSystemLanguage();
+                string singleInstanceMsg = sysLang == "es"
+                    ? "USBAnywhere Server ya se encuentra en ejecución."
+                    : "USBAnywhere Server is already running.";
+                System.Windows.MessageBox.Show(
+                    singleInstanceMsg,
+                    "USBAnywhere Server",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+            }
             Shutdown();
             return;
         }
@@ -99,25 +102,21 @@ public partial class App : System.Windows.Application
         {
             LogService.Error($"Unknown fatal error: {e.ExceptionObject}");
         }
-
-        LogService.Error("Application terminating due to unhandled exception");
     }
 
     private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        LogService.Exception(e.Exception, "Async Task");
+        LogService.Exception(e.Exception, "TaskScheduler");
+
+        // Mark as observed to prevent process termination
         e.SetObserved();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
-        if (_singleInstanceMutex != null)
-        {
-            try { _singleInstanceMutex.ReleaseMutex(); } catch { }
-            _singleInstanceMutex.Dispose();
-        }
-
-        LogService.Info($"Application exiting with code: {e.ApplicationExitCode}");
+        LogService.Info("Application exiting...");
+        _singleInstanceMutex?.ReleaseMutex();
+        _singleInstanceMutex?.Dispose();
         base.OnExit(e);
     }
 }

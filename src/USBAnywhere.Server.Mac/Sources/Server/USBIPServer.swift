@@ -84,6 +84,13 @@ public final class USBIPServer {
                 continue
             }
             
+            #if canImport(Darwin)
+            var noSigPipe: Int32 = 1
+            setsockopt(clientFd, SOL_SOCKET, SO_NOSIGPIPE, &noSigPipe, socklen_t(MemoryLayout<Int32>.size))
+            #endif
+            var rcvTimeout = timeval(tv_sec: 30, tv_usec: 0)
+            setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &rcvTimeout, socklen_t(MemoryLayout<timeval>.size))
+            
             let clientIP = String(cString: inet_ntoa(clientAddr.sin_addr))
             emitLog("📡 Client connected from \(clientIP)")
             
@@ -205,10 +212,11 @@ public final class USBIPServer {
             
             if cmdType == USBIPConstants.cmdSubmit {
                 guard let cmd = USBIPPackets.CmdSubmit.decode(from: buf) else { break }
+                guard cmd.transferBufferLength <= 1_048_576 else { break }
                 
                 // If OUT transfer, read payload buffer
                 var fullCmd = cmd
-                if cmd.direction == USBIPConstants.dirOut && cmd.transferBufferLength > 0 {
+                if cmd.direction == USBIPConstants.dirOut && cmd.transferBufferLength > 0 && cmd.transferBuffer.isEmpty {
                     guard let outData = readExact(fd: fd, count: Int(cmd.transferBufferLength)) else { break }
                     fullCmd = USBIPPackets.CmdSubmit(
                         seqnum: cmd.seqnum, devid: cmd.devid, direction: cmd.direction,

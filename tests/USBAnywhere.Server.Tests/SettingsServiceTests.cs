@@ -1,3 +1,4 @@
+using System.IO;
 using USBAnywhere.Server.Models;
 using USBAnywhere.Server.Services;
 using Xunit;
@@ -26,27 +27,45 @@ public class SettingsServiceTests
     [Fact]
     public void Settings_SaveAndLoad_MaintainsIntegrity()
     {
-        var current = SettingsService.Current;
-        current.Theme = "light";
-        current.ShowNotifications = false;
-        current.AutoBindEnabled = true;
-        current.AutoUnbindOnDisconnect = false;
+        var settingsPath = PathService.SettingsFilePath;
+        string? originalContent = File.Exists(settingsPath) ? File.ReadAllText(settingsPath) : null;
 
-        bool saved = SettingsService.Save();
-        Assert.True(saved);
+        try
+        {
+            var current = SettingsService.Current;
+            current.Theme = "light";
+            current.ShowNotifications = false;
+            current.AutoBindEnabled = true;
+            current.AutoUnbindOnDisconnect = false;
 
-        var loaded = SettingsService.Load();
-        Assert.Equal("light", loaded.Theme);
-        Assert.False(loaded.ShowNotifications);
-        Assert.True(loaded.AutoBindEnabled);
-        Assert.False(loaded.AutoUnbindOnDisconnect);
+            bool saved = SettingsService.Save();
+            Assert.True(saved);
 
-        // Reset
-        current.Theme = "dark";
-        current.ShowNotifications = true;
-        current.AutoBindEnabled = false;
-        current.AutoUnbindOnDisconnect = true;
-        SettingsService.Save();
+            var loaded = SettingsService.Load();
+            Assert.Equal("light", loaded.Theme);
+            Assert.False(loaded.ShowNotifications);
+            Assert.True(loaded.AutoBindEnabled);
+            Assert.False(loaded.AutoUnbindOnDisconnect);
+
+            // Reset in-memory state
+            current.Theme = "dark";
+            current.ShowNotifications = true;
+            current.AutoBindEnabled = false;
+            current.AutoUnbindOnDisconnect = true;
+            SettingsService.Save();
+        }
+        finally
+        {
+            if (originalContent != null)
+            {
+                File.WriteAllText(settingsPath, originalContent);
+                SettingsService.Load();
+            }
+            else if (File.Exists(settingsPath))
+            {
+                try { File.Delete(settingsPath); } catch { }
+            }
+        }
     }
 
     [Fact]

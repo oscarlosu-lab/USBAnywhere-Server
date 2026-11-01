@@ -65,6 +65,12 @@ Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 ; Launch after install
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent shellexec
 
+[UninstallRun]
+; Remove scheduled startup task and firewall rules on uninstall
+Filename: "{sys}\schtasks.exe"; Parameters: "/delete /tn ""USBAnywhere Server"" /f"; Flags: runhidden; RunOnceId: "DelStartupTask"
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""USBAnywhere Server (TCP 3240)"""; Flags: runhidden; RunOnceId: "DelFwTcp"
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""USBAnywhere Discovery (UDP 3241)"""; Flags: runhidden; RunOnceId: "DelFwUdp"
+
 [UninstallDelete]
 ; Clean up settings and logs on uninstall
 Type: filesandordirs; Name: "{app}\logs"

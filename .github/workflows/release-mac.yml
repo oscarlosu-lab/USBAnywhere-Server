@@ -32,22 +32,19 @@ jobs:
           cp .build/release/usbanywhere-server-mac ../../dist/
           cd ../../dist
           chmod +x usbanywhere-server-mac
-          tar -czvf USBAnywhere-Server-macOS-v3.2.0.tar.gz usbanywhere-server-mac
-          zip -9 USBAnywhere-Server-macOS-v3.2.0.zip usbanywhere-server-mac
-          shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.2.0.tar.gz USBAnywhere-Server-macOS-v3.2.0.zip > SHA256SUMS-macOS.txt
+          tar -czvf "USBAnywhere-Server-macOS-${{ github.ref_name }}.tar.gz" usbanywhere-server-mac
+          zip -9 "USBAnywhere-Server-macOS-${{ github.ref_name }}.zip" usbanywhere-server-mac
+          shasum -a 256 usbanywhere-server-mac "USBAnywhere-Server-macOS-${{ github.ref_name }}.tar.gz" "USBAnywhere-Server-macOS-${{ github.ref_name }}.zip" > SHA256SUMS-macOS.txt
 
       - name: Upload Artifacts to Workflow Run
         uses: actions/upload-artifact@v4
         with:
-          name: USBAnywhere-Server-macOS-v3.2.0
+          name: USBAnywhere-Server-macOS-${{ github.ref_name }}
           path: dist/*
 
       - name: Publish to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_TAG="v3.2.0"
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
-            RELEASE_TAG="${{ github.ref_name }}"
-          fi
+          RELEASE_TAG="${{ github.ref_name }}"
           gh release upload "${RELEASE_TAG}" dist/* --clobber || gh release create "${RELEASE_TAG}" dist/* --title "USBAnywhere Server ${RELEASE_TAG}" --notes "Official macOS release binary (Universal Apple Silicon & Intel)." || true

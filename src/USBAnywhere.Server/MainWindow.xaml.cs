@@ -47,6 +47,7 @@ public partial class MainWindow : Window
     private string _currentLanguage = "en";
     private string _currentTheme = "dark";
     private string _primaryIp = "127.0.0.1";
+    private bool _isRefreshing;
 
     public MainWindow()
     {
@@ -314,6 +315,8 @@ public partial class MainWindow : Window
 
     private async Task RefreshDeviceListAsync()
     {
+        if (_isRefreshing) return;
+        _isRefreshing = true;
         try
         {
             var devices = await _usbipdService.GetDevicesAsync();
@@ -417,6 +420,10 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             AddLocalizedLog("log_refresh_error", ex.Message);
+        }
+        finally
+        {
+            _isRefreshing = false;
         }
     }
 

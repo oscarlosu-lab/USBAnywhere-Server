@@ -21,7 +21,7 @@ public final class BonjourPublisher: NSObject, NetServiceDelegate {
         
         let txtDict: [String: Data] = [
             "proto": "usbip".data(using: .utf8)!,
-            "version": "3.1.0".data(using: .utf8)!,
+            "version": "3.2.0".data(using: .utf8)!,
             "platform": "macOS".data(using: .utf8)!
         ]
         let txtData = NetService.data(fromTXTRecord: txtDict)

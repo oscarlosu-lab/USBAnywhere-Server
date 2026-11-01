@@ -168,9 +168,10 @@ public final class URBHandler {
     }
 
     public func createConfigurationDescriptor() -> Data {
-        let ifaces = device.interfaces.isEmpty
+        let rawIfaces = device.interfaces.isEmpty
             ? [USBInterfaceInfo(interfaceClass: device.bDeviceClass == 0 ? 0x03 : device.bDeviceClass, interfaceSubClass: 0, interfaceProtocol: 0)]
             : device.interfaces
+        let ifaces = Array(rawIfaces.prefix(min(rawIfaces.count, 15)))
         let reportDescLen = UInt16(createHidReportDescriptor().count)
 
         var body = Data()

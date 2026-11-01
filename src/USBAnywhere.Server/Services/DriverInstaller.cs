@@ -78,7 +78,7 @@ public class DriverInstaller
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "msiexec.exe",
+                FileName = Path.Combine(Environment.SystemDirectory, "msiexec.exe"),
                 Arguments = $"/i \"{msiPath}\" /quiet /norestart",
                 UseShellExecute = !IsRunningAsAdmin(),
                 Verb = IsRunningAsAdmin() ? "" : "runas",
@@ -192,7 +192,7 @@ public class DriverInstaller
             Log($"📦 Uninstalling via msiexec for {productCode}...");
             var psi = new ProcessStartInfo
             {
-                FileName = "msiexec.exe",
+                FileName = Path.Combine(Environment.SystemDirectory, "msiexec.exe"),
                 Arguments = $"/x {productCode} /quiet /norestart",
                 UseShellExecute = false,
                 CreateNoWindow = true

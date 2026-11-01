@@ -1,7 +1,7 @@
 namespace USBAnywhere.Server.Services;
 
 /// <summary>
-/// Localization service - Comprehensive bilingual translation dictionaries (ES/EN) for USBAnywhere Server v3.0.0
+/// Localization service - Comprehensive bilingual translation dictionaries (ES/EN) for USBAnywhere Server v3.2.0
 /// </summary>
 public class LocalizationService
 {
@@ -15,7 +15,7 @@ public class LocalizationService
             {
                 // Window & Header
                 ["title"] = "USBAnywhere Server",
-                ["subtitle"] = "Servidor USB/IP para Windows — Ecosistema USBAnywhere v3.0",
+                ["subtitle"] = "Servidor USB/IP para Windows — Ecosistema USBAnywhere v3.2",
                 ["tip_ip_badge"] = "Haz clic para copiar la IP del servidor para el cliente USBAnywhere",
                 ["tip_client_btn"] = "Abrir Cliente USBAnywhere o copiar IP del servidor",
                 ["tip_lang_btn"] = "Cambiar idioma (ES/EN)",
@@ -82,7 +82,7 @@ public class LocalizationService
                 ["badge_installed"] = "INSTALADO",
 
                 // Log Messages
-                ["log_server_started"] = "🌐 USBAnywhere Server v3.0.0 — Servidor USB/IP para Windows",
+                ["log_server_started"] = "🌐 USBAnywhere Server v3.2.0 — Servidor USB/IP para Windows",
                 ["log_driver_detected"] = "✅ usbipd-win detectado y listo",
                 ["log_driver_not_installed"] = "⚠️ usbipd-win no está instalado",
                 ["log_driver_installing"] = "📦 Instalando driver usbipd-win...",
@@ -203,7 +203,7 @@ public class LocalizationService
             {
                 // Window & Header
                 ["title"] = "USBAnywhere Server",
-                ["subtitle"] = "Windows USB/IP Server — USBAnywhere v3.0 Ecosystem",
+                ["subtitle"] = "Windows USB/IP Server — USBAnywhere v3.2 Ecosystem",
                 ["tip_ip_badge"] = "Click to copy Server IP for USBAnywhere Client",
                 ["tip_client_btn"] = "Open USBAnywhere Client or copy Server IP",
                 ["tip_lang_btn"] = "Switch language (ES/EN)",
@@ -270,7 +270,7 @@ public class LocalizationService
                 ["badge_installed"] = "INSTALLED",
 
                 // Log Messages
-                ["log_server_started"] = "🌐 USBAnywhere Server v3.0.0 — Windows USB/IP Server",
+                ["log_server_started"] = "🌐 USBAnywhere Server v3.2.0 — Windows USB/IP Server",
                 ["log_driver_detected"] = "✅ usbipd-win detected and ready",
                 ["log_driver_not_installed"] = "⚠️ usbipd-win is not installed",
                 ["log_driver_installing"] = "📦 Installing usbipd-win driver...",

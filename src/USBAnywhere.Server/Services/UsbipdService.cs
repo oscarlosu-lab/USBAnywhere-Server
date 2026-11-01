@@ -19,6 +19,7 @@ public class UsbipdService : IDisposable
     private string _usbipdPath = "usbipd.exe";
     private Dictionary<string, string> _wmiDeviceCache = new();
     private DateTime _lastWmiCacheUpdate = DateTime.MinValue;
+    private readonly object _wmiCacheLock = new();
 
     public event EventHandler<string>? LogMessage;
     public bool IsUsbipdAvailable { get; private set; }
@@ -137,9 +138,12 @@ public class UsbipdService : IDisposable
 
                     var vidPidKey = $"{vid:X4}:{pid:X4}";
                     string enrichedName = baseName;
-                    if (_wmiDeviceCache.TryGetValue(vidPidKey, out var wmiName))
+                    lock (_wmiCacheLock)
                     {
-                        enrichedName = wmiName;
+                        if (_wmiDeviceCache.TryGetValue(vidPidKey, out var wmiName))
+                        {
+                            enrichedName = wmiName;
+                        }
                     }
 
                     bool isNotShared = rawState.StartsWith("Not shared", StringComparison.OrdinalIgnoreCase);
@@ -172,9 +176,12 @@ public class UsbipdService : IDisposable
     private async Task UpdateWmiCacheIfNeededAsync()
     {
         var cacheSeconds = Math.Clamp(SettingsService.Current.WmiCacheDurationSeconds, 5, 300);
-        if (DateTime.Now - _lastWmiCacheUpdate < TimeSpan.FromSeconds(cacheSeconds) && _wmiDeviceCache.Count > 0)
+        lock (_wmiCacheLock)
         {
-            return;
+            if (DateTime.Now - _lastWmiCacheUpdate < TimeSpan.FromSeconds(cacheSeconds) && _wmiDeviceCache.Count > 0)
+            {
+                return;
+            }
         }
 
         await Task.Run(() =>
@@ -203,8 +210,11 @@ public class UsbipdService : IDisposable
                     }
                 }
 
-                _wmiDeviceCache = newCache;
-                _lastWmiCacheUpdate = DateTime.Now;
+                lock (_wmiCacheLock)
+                {
+                    _wmiDeviceCache = newCache;
+                    _lastWmiCacheUpdate = DateTime.Now;
+                }
             }
             catch { }
         });
@@ -302,7 +312,7 @@ public class UsbipdService : IDisposable
                 FileName = _usbipdPath,
                 Arguments = args,
                 UseShellExecute = false,
-                RedirectStandardOutput = true,
+                RedirectStandardOutput = false,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
@@ -312,7 +322,16 @@ public class UsbipdService : IDisposable
 
             var errTask = process.StandardError.ReadToEndAsync();
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            await process.WaitForExitAsync(cts.Token);
+            try
+            {
+                await process.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { }
+                Log("⚠️ usbipd command timed out");
+                return false;
+            }
 
             if (process.ExitCode != 0)
             {

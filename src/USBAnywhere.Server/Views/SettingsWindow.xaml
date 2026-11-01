@@ -93,6 +93,11 @@
                 <!-- SECURITY -->
                 <TextBlock x:Name="secSecurity" Text="🔒 SECURITY" Style="{StaticResource SectionHeader}"/>
                 <CheckBox x:Name="chkWhitelist" Content="Enable IP Whitelist (Enforced via Windows Firewall)"/>
+                <TextBox x:Name="txtWhitelistedIPs" Margin="20,4,0,6" Padding="6,4"
+                         Background="{DynamicResource BgSecondary}"
+                         Foreground="{DynamicResource TextPrimary}"
+                         BorderBrush="{DynamicResource AccentColor}"
+                         ToolTip="Comma-separated IPs or CIDRs (e.g. 192.168.1.50, 10.0.0.0/24)"/>
                 <TextBlock Text="Note: USB/IP communicates without PIN authentication; security is strictly enforced via Firewall &amp; VPN." 
                            FontSize="10" Foreground="{DynamicResource TextSecondary}" 
                            TextWrapping="Wrap" Margin="20,0,0,0"/>

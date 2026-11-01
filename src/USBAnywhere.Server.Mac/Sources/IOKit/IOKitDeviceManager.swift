@@ -25,7 +25,17 @@ public struct SharedServerState: Codable {
 
 public final class IOKitDeviceManager {
     public static let shared = IOKitDeviceManager()
-    public static let stateFilePath = "/tmp/usbanywhere-mac-state.json"
+    public static var stateFilePath: String {
+        let dir: String
+        if geteuid() == 0 {
+            dir = "/Library/Application Support/USBAnywhere"
+        } else {
+            let home = FileManager.default.homeDirectoryForCurrentUser.path
+            dir = "\(home)/Library/Application Support/USBAnywhere"
+        }
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        return "\(dir)/state.json"
+    }
     
     private var state = SharedServerState()
     private var cachedDevices: [String: USBDeviceInfo] = [:]
@@ -54,7 +64,10 @@ public final class IOKitDeviceManager {
     
     private func saveSharedStateUnlocked() {
         guard let data = try? JSONEncoder().encode(state) else { return }
-        try? data.write(to: URL(fileURLWithPath: Self.stateFilePath), options: .atomic)
+        let path = Self.stateFilePath
+        let dir = (path as NSString).deletingLastPathComponent
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        try? data.write(to: URL(fileURLWithPath: path), options: .atomic)
     }
 
     public func getState() -> SharedServerState {
@@ -251,8 +264,17 @@ public final class IOKitDeviceManager {
         
         let locationId = (getProperty(service, key: "locationID") as? NSNumber)?.uint32Value ?? 0
         let busNum = max(1, (locationId >> 24) & 0xFF)
-        let devNum = max(1, (locationId >> 16) & 0xFF)
-        let busId = "\(busNum)-\(devNum)"
+        let usbAddr = (getProperty(service, key: "USB Address") as? NSNumber)?.uint32Value
+            ?? (getProperty(service, key: kUSBDevicePropertyAddress) as? NSNumber)?.uint32Value
+        var portNibbles: [UInt32] = []
+        for shift in stride(from: 20, through: 0, by: -4) {
+            let nibble = (locationId >> shift) & 0x0F
+            if nibble == 0 { break }
+            portNibbles.append(nibble)
+        }
+        let devNum = usbAddr ?? max(1, (locationId >> 16) & 0xFF)
+        let portChain = portNibbles.isEmpty ? "\(devNum)" : portNibbles.map(String.init).joined(separator: ".")
+        let busId = usbAddr != nil ? "\(busNum)-\(usbAddr!)" : "\(busNum)-\(portChain)"
         let path = "/sys/devices/pci0000:00/0000:00:14.0/usb\(busNum)/\(busId)"
         
         // Strings
