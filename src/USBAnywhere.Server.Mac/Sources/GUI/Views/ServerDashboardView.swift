@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// USBAnywhere Server for macOS - SwiftUI Dashboard View
+// USBAnywhere Server for macOS - SwiftUI Dashboard View (Obsidian Precision)
 // Copyright (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere-Server
 // Licensed under GPL v3
 // ─────────────────────────────────────────────────────────────────────────────
@@ -10,13 +10,12 @@ import SwiftUI
 public struct ServerDashboardView: View {
     @EnvironmentObject var vm: ServerViewModel
     @State private var showingLogs = true
-    @State private var showingSettings = false
 
-    private let bgDark = Color(red: 0.043, green: 0.047, blue: 0.055)
-    private let cardDark = Color(red: 0.075, green: 0.078, blue: 0.090)
-    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)
-    private let neonCyan = Color(red: 0.631, green: 0.631, blue: 0.667)
-    private let textMuted = Color(red: 0.557, green: 0.569, blue: 0.604)
+    private let bgDark = Color(red: 0.043, green: 0.047, blue: 0.055)     // #0B0C0E Carbon Obsidian
+    private let cardDark = Color(red: 0.075, green: 0.078, blue: 0.090)   // #131417 Surface Elevated
+    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)    // #D2F800 Acid Lime Accent
+    private let neonCyan = Color(red: 0.0, green: 0.898, blue: 1.0)       // #00E5FF Electric Cyan
+    private let textMuted = Color(red: 0.631, green: 0.631, blue: 0.667)  // #A1A1AA Zinc-400
 
     public init() {}
 
@@ -66,7 +65,7 @@ public struct ServerDashboardView: View {
                         }
                     }
                 }
-                .frame(minWidth: 420)
+                .frame(minWidth: 440)
 
                 // Live Logs Panel
                 if showingLogs {
@@ -93,89 +92,136 @@ public struct ServerDashboardView: View {
                                 ForEach(Array(vm.logs.enumerated()), id: \.offset) { _, log in
                                     Text(log)
                                         .font(.system(size: 11, design: .monospaced))
-                                        .foregroundColor(log.contains("❌") ? Color.red : (log.contains("🟢") || log.contains("✅") ? neonGreen : textMuted))
-                                        .textSelection(.enabled)
+                                        .foregroundColor(log.contains("❌") ? .red : (log.contains("✅") || log.contains("🟢") ? neonGreen : textMuted))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                             .padding(.horizontal, 12)
-                            .padding(.bottom, 8)
+                            .padding(.bottom, 10)
                         }
                     }
-                    .frame(minWidth: 260, idealWidth: 300, maxWidth: 400)
-                    .background(Color(red: 0.05, green: 0.06, blue: 0.08))
+                    .frame(minWidth: 260, idealWidth: 310, maxWidth: 400)
+                    .background(cardDark)
                 }
             }
 
-            // Footer Status Bar
+            Divider().background(Color.white.opacity(0.1))
+
+            // Footer Bar
             footerSection
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 8)
-                .background(Color(red: 0.06, green: 0.07, blue: 0.10))
+                .background(Color(red: 0.086, green: 0.090, blue: 0.106))
         }
         .background(bgDark)
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
-                .environmentObject(vm)
+        .sheet(isPresented: $vm.showingSettings) {
+            VStack(spacing: 0) {
+                HStack {
+                    Text("USBAnywhere Server Settings")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Button("Done") {
+                        vm.showingSettings = false
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(neonGreen)
+                    .cornerRadius(6)
+                }
+                .padding(14)
+                .background(cardDark)
+
+                SettingsView()
+                    .environmentObject(vm)
+            }
+            .frame(width: 540, height: 480)
         }
     }
 
     // MARK: - Header
     private var headerSection: some View {
-        HStack(alignment: .center, spacing: 14) {
-            // Pulse Server Indicator
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(vm.isServerActive ? neonGreen : Color.red)
-                    .frame(width: 10, height: 10)
-                    .shadow(color: vm.isServerActive ? neonGreen.opacity(0.7) : Color.clear, radius: 4)
-
-                VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 16) {
+            // App Title & Subtitle
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 8) {
+                    Image(systemName: "cable.connector.horizontal")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(neonGreen)
                     Text("USBAnywhere Server")
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                    Text(vm.isServerActive ? "LISTENING ON PORT \(vm.serverPort)" : "SERVER STOPPED")
-                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                        .foregroundColor(vm.isServerActive ? neonGreen : textMuted)
+                    Text("macOS v3.2.0")
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(neonCyan.opacity(0.15))
+                        .foregroundColor(neonCyan)
+                        .cornerRadius(4)
                 }
+                Text("Zero-Trust Native IOKit USB/IP Server & Dynamic Control Daemon")
+                    .font(.system(size: 11))
+                    .foregroundColor(textMuted)
             }
 
             Spacer()
 
-            // Server IP Copy Badge
+            // IP Pill (Click to copy)
             Button(action: { vm.copyIpToClipboard() }) {
                 HStack(spacing: 6) {
-                    Image(systemName: "network")
+                    Image(systemName: "wifi")
                         .font(.system(size: 11))
+                        .foregroundColor(neonCyan)
                     Text("\(vm.primaryIpAddress):\(vm.serverPort)")
-                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.white)
                     Image(systemName: "doc.on.doc")
                         .font(.system(size: 10))
+                        .foregroundColor(textMuted)
                 }
-                .foregroundColor(neonCyan)
                 .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(neonCyan.opacity(0.12))
+                .padding(.vertical, 6)
+                .background(cardDark)
                 .cornerRadius(6)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(neonCyan.opacity(0.4), lineWidth: 1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(neonCyan.opacity(0.35), lineWidth: 1)
+                )
             }
             .buttonStyle(.plain)
-            .help("Click to copy Server IP to clipboard")
+            .help("Click to copy Server IP address")
 
-            // Toggle Server Switch
+            // Server Start / Stop Toggle
             Button(action: { vm.toggleServer() }) {
-                Label(vm.isServerActive ? "Stop Daemon" : "Start Daemon",
-                      systemImage: vm.isServerActive ? "stop.circle.fill" : "play.circle.fill")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(vm.isServerActive ? .white : .black)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(vm.isServerActive ? Color.red.opacity(0.85) : neonGreen)
-                    .cornerRadius(7)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(vm.isServerActive ? Color.black : Color.black)
+                        .frame(width: 8, height: 8)
+                        .overlay(
+                            Circle()
+                                .fill(vm.isServerActive ? neonGreen : Color.red)
+                                .frame(width: 8, height: 8)
+                        )
+                    Text(vm.isServerActive ? "SERVER ACTIVE" : "START SERVER")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(vm.isServerActive ? neonGreen : .black)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(vm.isServerActive ? Color(red: 0.10, green: 0.16, blue: 0.08) : neonGreen)
+                .cornerRadius(6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(vm.isServerActive ? neonGreen : Color.clear, lineWidth: 1)
+                )
             }
             .buttonStyle(.plain)
 
             // Settings Button
-            Button(action: { showingSettings = true }) {
+            Button(action: { vm.showingSettings = true }) {
                 Image(systemName: "gearshape.fill")
                     .font(.system(size: 14))
                     .foregroundColor(textMuted)
@@ -265,7 +311,7 @@ public struct ServerDashboardView: View {
     // MARK: - Footer
     private var footerSection: some View {
         HStack {
-            Text("\(vm.devices.count) USB Peripherals (\(vm.devices.filter { $0.isBound }.count) Shared)")
+            Text("\(vm.devices.count) USB Peripherals (\(vm.devices.filter { $0.isBound }.count) Shared, \(vm.activeClientsCount) Attached)")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(textMuted)
 
@@ -293,10 +339,10 @@ struct DeviceCardRow: View {
     @ObservedObject var device: USBDeviceInfo
     @EnvironmentObject var vm: ServerViewModel
 
-    private let cardDark = Color(red: 0.11, green: 0.14, blue: 0.19)
-    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)
-    private let neonCyan = Color(red: 0.631, green: 0.631, blue: 0.667)
-    private let textMuted = Color(red: 0.557, green: 0.569, blue: 0.604)
+    private let cardDark = Color(red: 0.075, green: 0.078, blue: 0.090)   // #131417 Unified Surface Elevated
+    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)    // #D2F800 Acid Lime Accent
+    private let neonCyan = Color(red: 0.0, green: 0.898, blue: 1.0)       // #00E5FF Electric Cyan
+    private let textMuted = Color(red: 0.631, green: 0.631, blue: 0.667)  // #A1A1AA Zinc-400
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -312,7 +358,7 @@ struct DeviceCardRow: View {
             // Device Details
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Text(device.productName ?? "USB Peripheral")
+                    Text(device.cleanProductName)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -323,7 +369,7 @@ struct DeviceCardRow: View {
                         .foregroundColor(neonCyan)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(neonCyan.opacity(0.12))
+                        .background(neonCyan.opacity(0.14))
                         .cornerRadius(4)
                 }
 
@@ -363,7 +409,7 @@ struct DeviceCardRow: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(device.isBound ? .white : .black)
                         .frame(width: 60, height: 26)
-                        .background(device.isBound ? Color(red: 0.25, green: 0.15, blue: 0.15) : neonGreen)
+                        .background(device.isBound ? Color(red: 0.25, green: 0.12, blue: 0.12) : neonGreen)
                         .cornerRadius(6)
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(device.isBound ? Color.red.opacity(0.6) : Color.clear, lineWidth: 1))
                 }
@@ -375,7 +421,7 @@ struct DeviceCardRow: View {
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(device.isBound ? neonGreen.opacity(0.4) : Color.white.opacity(0.06), lineWidth: 1)
+                .stroke(device.isBound ? neonGreen.opacity(0.45) : Color.white.opacity(0.08), lineWidth: 1)
         )
     }
 }
@@ -391,7 +437,7 @@ struct BadgePill: View {
             .foregroundColor(color)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
-            .background(Color(red: 0.086, green: 0.090, blue: 0.106))
+            .background(Color(red: 0.043, green: 0.047, blue: 0.055))
             .cornerRadius(4)
     }
 }

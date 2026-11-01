@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 #endif
 
-let version = "3.1.0"
+let version = "3.2.0"
 
 func printBanner() {
     print("""
@@ -29,9 +29,11 @@ func printHelp() {
     COMMANDS:
       gui, (no args)             Launch native macOS SwiftUI Dashboard & Menu Bar Extra
       list                       List connected USB devices and their bus IDs
+      status [--json]            Display server and device status (supports JSON output)
       bind <busid>               Bind and export a USB device (e.g. 1-1)
       unbind <busid>             Unbind a shared USB device
-      serve [options]            Start USB/IP server daemon in terminal
+      policy [action] [target]   View or configure host export policy (allow/deny/protect-hid)
+      serve [options]            Start USB/IP server & Dynamic Control daemon in terminal
       control, dashboard         Open interactive Control Suite dashboard
       install-service            Install and start background launchd service (sudo)
       uninstall-service          Stop and remove background launchd service (sudo)
@@ -45,8 +47,9 @@ func printHelp() {
     EXAMPLES:
       usbanywhere-server-mac                     # Launch GUI Desktop App
       usbanywhere-server-mac list                # List USB peripherals
+      usbanywhere-server-mac status --json       # Query server status as JSON
       usbanywhere-server-mac bind 1-1            # Bind peripheral on bus 1-1
-      usbanywhere-server-mac serve --auto-bind   # Headless CLI server daemon
+      usbanywhere-server-mac serve               # On-Demand Dynamic Server daemon
       sudo usbanywhere-server-mac install-service
     """)
 }
@@ -94,15 +97,37 @@ case "control", "dashboard":
     }
     
 case "list":
-    printBanner()
-    let devices = IOKitDeviceManager.shared.enumerateDevices()
-    if devices.isEmpty {
-        print("No USB devices found or permission denied.")
-    } else {
-        print("Discovered USB Devices:")
+    if args.contains("--dynamic") || args.contains("--raw") {
+        let devices = IOKitDeviceManager.shared.enumerateDevices()
         for dev in devices {
-            print("  \(dev)")
+            print(dev.dynamicInventoryLine)
         }
+    } else {
+        printBanner()
+        let devices = IOKitDeviceManager.shared.enumerateDevices()
+        if devices.isEmpty {
+            print("No USB devices found or permission denied.")
+        } else {
+            print("Discovered USB Devices:")
+            for dev in devices {
+                print("  \(dev)")
+            }
+        }
+    }
+
+case "status":
+    let jsonReply = ControlServer.processCommand("STATUS")
+    if args.contains("--json") {
+        print(jsonReply)
+    } else {
+        printBanner()
+        let devices = IOKitDeviceManager.shared.enumerateDevices()
+        let boundCount = devices.filter { $0.isBound }.count
+        let claimedCount = devices.filter { $0.isClaimed }.count
+        print("Status:            ACTIVE (v\(version))")
+        print("USB/IP Port:       3240 (TCP)")
+        print("Dynamic API Port:  3241 (TCP/UDP)")
+        print("Detected Devices:  \(devices.count) (\(boundCount) shared, \(claimedCount) attached)")
     }
     
 case "bind":
@@ -111,6 +136,11 @@ case "bind":
         exit(1)
     }
     let busId = args[1]
+    let check = IOKitDeviceManager.shared.isDeviceExportAllowed(busId: busId)
+    guard check.allowed else {
+        print("🛡️ [Policy Block] Cannot share '\(busId)': \(check.reason)")
+        exit(1)
+    }
     _ = IOKitDeviceManager.shared.bindDevice(busId: busId)
     print("✅ Device '\(busId)' is now marked for export.")
     
@@ -124,6 +154,39 @@ case "unbind":
         print("✅ Device '\(busId)' unbound successfully.")
     } else {
         print("⚠️ Device '\(busId)' was not bound.")
+    }
+
+case "policy":
+    let st = IOKitDeviceManager.shared.getState()
+    let action = args.count >= 2 ? args[1].lowercased() : "show"
+    let target = args.count >= 3 ? args[2] : ""
+    switch action {
+    case "show":
+        print("═══ 🛡️ USBAnywhere macOS Host Export Policy ═══")
+        print("Protect local HID: \(st.protectLocalHid ? "ACTIVE" : "OFF")")
+        print("Allowlist (\(st.allowlist.count)): \(st.allowlist)")
+        print("Denylist (\(st.denylist.count)):  \(st.denylist)")
+    case "deny" where !target.isEmpty:
+        var list = st.denylist
+        if !list.contains(target) { list.append(target) }
+        IOKitDeviceManager.shared.updatePolicy(denylist: list)
+        print("✓ Added '\(target)' to denylist.")
+    case "allow" where !target.isEmpty:
+        var list = st.allowlist
+        if !list.contains(target) { list.append(target) }
+        IOKitDeviceManager.shared.updatePolicy(allowlist: list)
+        print("✓ Added '\(target)' to allowlist.")
+    case "remove" where !target.isEmpty:
+        let deny = st.denylist.filter { $0.caseInsensitiveCompare(target) != .orderedSame }
+        let allow = st.allowlist.filter { $0.caseInsensitiveCompare(target) != .orderedSame }
+        IOKitDeviceManager.shared.updatePolicy(allowlist: allow, denylist: deny)
+        print("✓ Removed '\(target)' from policy lists.")
+    case "protect-hid":
+        let enabled = ["on", "true", "1", "yes"].contains(target.lowercased())
+        IOKitDeviceManager.shared.updatePolicy(protectLocalHid: enabled)
+        print("✓ Local HID Protection is now \(enabled ? "ENABLED" : "DISABLED").")
+    default:
+        print("Usage: usbanywhere-server-mac policy [show | deny <id> | allow <id> | remove <id> | protect-hid <on|off>]")
     }
     
 case "install-service":
@@ -157,9 +220,18 @@ case "serve":
         idx += 1
     }
     
+    // Auto-export remembered pinned devices (and all non-hub devices if --auto-bind is passed)
+    let rawDevices = IOKitDeviceManager.shared.enumerateDevices()
+    let pinned = AutoBindManager.shared.getAutoBoundList()
+    for dev in rawDevices where pinned.contains(dev.vidPidString.uppercased()) {
+        _ = IOKitDeviceManager.shared.bindDevice(busId: dev.busId)
+    }
+
     if autoBind {
         let count = IOKitDeviceManager.shared.bindAllDevices()
         print("⚡ Auto-bind enabled: \(count) local device(s) exported.")
+    } else {
+        print("🔄 Dynamic On-Demand Mode (Zero-Host-Lockout): Devices remain local until requested by a client.")
     }
     
     let server = USBIPServer(port: port)

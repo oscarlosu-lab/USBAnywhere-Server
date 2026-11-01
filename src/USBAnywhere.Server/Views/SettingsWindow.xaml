@@ -11,8 +11,8 @@
         <!-- Section Header Style -->
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{DynamicResource HighlightColor}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
             <Setter Property="Margin" Value="0,15,0,8"/>
         </Style>
         
@@ -26,7 +26,8 @@
         <!-- Button Style -->
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentForeground}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="20,10"/>
             <Setter Property="FontSize" Value="13"/>
@@ -35,13 +36,13 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="5" 
+                                CornerRadius="6" 
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource HighlightColor}"/>
+                                <Setter Property="Opacity" Value="0.86"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -140,13 +141,13 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="btnReset" Content="Reset to Defaults" Style="{StaticResource ModernButton}" 
                         Click="BtnReset_Click" Padding="15,10" Margin="0,0,10,0"
-                        Background="#7f8c8d"/>
+                        Background="#4B5563" Foreground="White"/>
                 <Button x:Name="btnCancel" Content="Cancel" Style="{StaticResource ModernButton}" 
                         Click="BtnCancel_Click" Padding="15,10" Margin="0,0,10,0"
-                        Background="#95a5a6"/>
+                        Background="#6B7280" Foreground="White"/>
                 <Button x:Name="btnSave" Content="💾 Save" Style="{StaticResource ModernButton}" 
                         Click="BtnSave_Click" Padding="20,10"
-                        Background="#27ae60"/>
+                        Background="#16A34A" Foreground="White"/>
             </StackPanel>
         </Border>
     </Grid>

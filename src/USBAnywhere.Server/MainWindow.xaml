@@ -12,43 +12,57 @@
         
         <!-- Button Style -->
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Background" Value="{DynamicResource BgTertiary}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="15,8"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="5" 
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource HighlightColor}"/>
+                                <Setter Property="Opacity" Value="0.86"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.72"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Primary Accent CTA Button (High-Contrast Electric Lime / Dark Slate) -->
+        <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentForeground}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
         
         <!-- DataGrid Style -->
         <Style TargetType="DataGrid">
-            <Setter Property="Background" Value="{DynamicResource BgSecondary}"/>
+            <Setter Property="Background" Value="{DynamicResource DataGridBg}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="RowBackground" Value="{DynamicResource BgSecondary}"/>
-            <Setter Property="AlternatingRowBackground" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="RowBackground" Value="{DynamicResource DataGridBg}"/>
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource DataGridAltBg}"/>
             <Setter Property="GridLinesVisibility" Value="None"/>
         </Style>
         
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Background" Value="{DynamicResource BgTertiary}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
@@ -131,7 +145,7 @@
                                 Click="BtnShareAll_Click" Margin="0,0,6,0" Background="#27ae60" Padding="8,3"/>
                         <Button x:Name="btnDiagnostics" Content="🔍 Diagnostics" Style="{StaticResource ModernButton}" 
                                 Click="BtnDiagnostics_Click" Margin="0,0,6,0" Background="#9b59b6" Padding="8,3"/>
-                        <Button x:Name="btnRefresh" Content="🔄 Refresh" Style="{StaticResource ModernButton}" 
+                        <Button x:Name="btnRefresh" Content="🔄 Refresh" Style="{StaticResource AccentButton}" 
                                 Click="BtnRefresh_Click" Margin="0,0,6,0" Padding="8,3"/>
                         <Button x:Name="btnUninstall" Content="🗑️ Uninstall" Style="{StaticResource ModernButton}" 
                                 Click="BtnUninstall_Click" Background="#c0392b" Padding="8,3"/>
@@ -141,14 +155,14 @@
         </Border>
         
         <!-- Device List -->
-        <Border Grid.Row="1" Margin="15,15,15,8" Background="{DynamicResource BgSecondary}" CornerRadius="8">
+        <Border Grid.Row="1" Margin="15,15,15,8" Background="{DynamicResource BgSecondary}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="8">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <Border Background="{DynamicResource AccentColor}" CornerRadius="8,8,0,0" Padding="12,8">
+                <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0" Padding="12,8">
                     <TextBlock x:Name="txtDevicesHeader" Text="📱 Local USB Devices" FontSize="13" FontWeight="SemiBold" 
                                Foreground="{DynamicResource TextPrimary}"/>
                 </Border>
@@ -201,19 +215,21 @@
         </Border>
         
         <!-- Log Panel -->
-        <Border Grid.Row="2" Margin="15,8,15,8" Background="{DynamicResource BgSecondary}" CornerRadius="8">
+        <Border Grid.Row="2" Margin="15,8,15,8" Background="{DynamicResource BgSecondary}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" CornerRadius="8">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <Border Background="{DynamicResource AccentColor}" CornerRadius="8,8,0,0" Padding="12,8">
+                <Border Background="{DynamicResource BgTertiary}" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0" Padding="12,8">
                     <Grid>
                         <TextBlock x:Name="txtLogHeader" Text="📋 Activity Log" FontSize="13" FontWeight="SemiBold" 
                                    Foreground="{DynamicResource TextPrimary}"/>
                         <Button x:Name="btnClearLog" Content="Clear" HorizontalAlignment="Right" 
-                                Style="{StaticResource ModernButton}" 
+                                Style="{StaticResource ModernButton}"
+                                Background="{DynamicResource BgPrimary}"
+                                Foreground="{DynamicResource TextPrimary}"
                                 Padding="8,2" FontSize="10"
                                 Click="BtnClearLog_Click"/>
                     </Grid>

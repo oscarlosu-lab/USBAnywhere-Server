@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// USBAnywhere Server for macOS - IOKit USB Device Enumeration & Manager
+// USBAnywhere Server for macOS - IOKit USB Device Enumeration & Shared State
 // Copyright (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere-Server
 // Licensed under GPL v3
 // ─────────────────────────────────────────────────────────────────────────────
@@ -11,19 +11,129 @@ import IOKit
 import IOKit.usb
 #endif
 
+public struct SharedServerState: Codable {
+    public var boundBusIds: Set<String> = []
+    public var dynamicBusIds: Set<String> = []
+    public var claimedBusIds: Set<String> = []
+    public var allowAll: Bool = true
+    public var allowlist: [String] = []
+    public var denylist: [String] = []
+    public var protectLocalHid: Bool = false
+
+    public init() {}
+}
+
 public final class IOKitDeviceManager {
     public static let shared = IOKitDeviceManager()
+    public static let stateFilePath = "/tmp/usbanywhere-mac-state.json"
     
-    private var boundBusIds: Set<String> = []
+    private var state = SharedServerState()
+    private var cachedDevices: [String: USBDeviceInfo] = [:]
     private let lock = NSLock()
     
-    private init() {}
+    private init() {
+        loadSharedState()
+    }
     
-    /// Binds a device busId for sharing over USB/IP
-    public func bindDevice(busId: String) -> Bool {
+    // MARK: - Cross-Process State Persistence
+    
+    public func loadSharedState() {
         lock.lock()
         defer { lock.unlock() }
-        boundBusIds.insert(busId)
+        loadSharedStateUnlocked()
+    }
+    
+    private func loadSharedStateUnlocked() {
+        guard FileManager.default.fileExists(atPath: Self.stateFilePath),
+              let data = try? Data(contentsOf: URL(fileURLWithPath: Self.stateFilePath)),
+              let decoded = try? JSONDecoder().decode(SharedServerState.self, from: data) else {
+            return
+        }
+        state = decoded
+    }
+    
+    private func saveSharedStateUnlocked() {
+        guard let data = try? JSONEncoder().encode(state) else { return }
+        try? data.write(to: URL(fileURLWithPath: Self.stateFilePath), options: .atomic)
+    }
+
+    public func getState() -> SharedServerState {
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        return state
+    }
+
+    public func updatePolicy(allowlist: [String]? = nil, denylist: [String]? = nil, protectLocalHid: Bool? = nil) {
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        if let allow = allowlist { state.allowlist = allow }
+        if let deny = denylist { state.denylist = deny }
+        if let hid = protectLocalHid { state.protectLocalHid = hid }
+        saveSharedStateUnlocked()
+    }
+
+    public func resetState() {
+        lock.lock()
+        defer { lock.unlock() }
+        state = SharedServerState()
+        saveSharedStateUnlocked()
+    }
+
+    // MARK: - Export Policy Verification
+
+    public func isDeviceExportAllowed(busId: String, device: USBDeviceInfo? = nil) -> (allowed: Bool, reason: String) {
+        lock.lock()
+        loadSharedStateUnlocked()
+        let currentState = state
+        let dev = device ?? cachedDevices[busId]
+        lock.unlock()
+
+        if let dev = dev, dev.isHub {
+            return (false, "USB Hubs cannot be shared")
+        }
+
+        let bId = busId.lowercased().trimmingCharacters(in: .whitespaces)
+        let vp = dev?.vidPidString.lowercased() ?? ""
+        let vid = vp.components(separatedBy: ":").first ?? ""
+
+        let deny = currentState.denylist.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+        if deny.contains(bId) || (!vp.isEmpty && deny.contains(vp)) || (!vid.isEmpty && deny.contains(vid)) {
+            return (false, "Device \(busId) (\(vp)) is blocked by host denylist")
+        }
+
+        if currentState.protectLocalHid, let dev = dev, dev.isHid {
+            return (false, "Device \(busId) (\(vp)) is protected local HID")
+        }
+
+        let allow = currentState.allowlist.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }
+        if !allow.isEmpty {
+            let matched = allow.contains(bId) || (!vp.isEmpty && allow.contains(vp)) || (!vid.isEmpty && allow.contains(vid))
+            if !matched {
+                return (false, "Device \(busId) (\(vp)) is not in host allowlist")
+            }
+        }
+
+        return (true, "OK")
+    }
+
+    // MARK: - Bind / Unbind Operations
+    
+    /// Binds a device busId for sharing over USB/IP
+    public func bindDevice(busId: String, dynamic: Bool = false) -> Bool {
+        let check = isDeviceExportAllowed(busId: busId)
+        guard check.allowed else {
+            return false
+        }
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        state.boundBusIds.insert(busId)
+        if dynamic {
+            state.dynamicBusIds.insert(busId)
+        }
+        saveSharedStateUnlocked()
         return true
     }
     
@@ -31,29 +141,63 @@ public final class IOKitDeviceManager {
     public func unbindDevice(busId: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        return boundBusIds.remove(busId) != nil
+        loadSharedStateUnlocked()
+        let removed = state.boundBusIds.remove(busId) != nil
+        state.dynamicBusIds.remove(busId)
+        state.claimedBusIds.remove(busId)
+        saveSharedStateUnlocked()
+        return removed
     }
     
     /// Checks if a busId is currently bound
     public func isBound(busId: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        return boundBusIds.contains(busId)
+        loadSharedStateUnlocked()
+        return state.boundBusIds.contains(busId)
+    }
+
+    public func isDynamicBound(busId: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        return state.dynamicBusIds.contains(busId)
+    }
+
+    public func setClaimed(busId: String, claimed: Bool) {
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        if claimed {
+            state.claimedBusIds.insert(busId)
+        } else {
+            state.claimedBusIds.remove(busId)
+        }
+        saveSharedStateUnlocked()
+    }
+
+    public func isClaimed(busId: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        loadSharedStateUnlocked()
+        return state.claimedBusIds.contains(busId)
     }
     
-    /// Binds all currently discovered non-hub devices
+    /// Binds all currently discovered non-hub devices that pass policy
     public func bindAllDevices() -> Int {
         let devices = enumerateDevices()
         var count = 0
-        for dev in devices where dev.bDeviceClass != 0x09 { // Skip USB Hubs
-            _ = bindDevice(busId: dev.busId)
-            count += 1
+        for dev in devices where !dev.isHub {
+            if bindDevice(busId: dev.busId) {
+                count += 1
+            }
         }
         return count
     }
     
-    /// Enumerates all currently connected USB devices on macOS
+    /// Enumerates all currently connected physical USB devices on macOS (excluding USB Hubs)
     public func enumerateDevices() -> [USBDeviceInfo] {
+        loadSharedState()
         #if os(macOS)
         var devices: [USBDeviceInfo] = []
         
@@ -70,7 +214,15 @@ public final class IOKitDeviceManager {
             defer { IOObjectRelease(service) }
             
             if let devInfo = extractDeviceInfo(from: service) {
+                // Skip USB Hubs and internal root controllers
+                if devInfo.isHub || devInfo.idVendor == 0x1D6B {
+                    continue
+                }
                 devInfo.isBound = isBound(busId: devInfo.busId)
+                devInfo.isClaimed = isClaimed(busId: devInfo.busId)
+                lock.lock()
+                cachedDevices[devInfo.busId] = devInfo
+                lock.unlock()
                 devices.append(devInfo)
             }
         }
@@ -98,8 +250,8 @@ public final class IOKitDeviceManager {
         let bConfigurationValue = (getProperty(service, key: "bConfigurationValue") as? NSNumber)?.uint8Value ?? 1
         
         let locationId = (getProperty(service, key: "locationID") as? NSNumber)?.uint32Value ?? 0
-        let busNum = (locationId >> 24) & 0xFF
-        let devNum = (locationId >> 16) & 0xFF
+        let busNum = max(1, (locationId >> 24) & 0xFF)
+        let devNum = max(1, (locationId >> 16) & 0xFF)
         let busId = "\(busNum)-\(devNum)"
         let path = "/sys/devices/pci0000:00/0000:00:14.0/usb\(busNum)/\(busId)"
         
@@ -118,7 +270,7 @@ public final class IOKitDeviceManager {
             usbipSpeed = USBIPConstants.speedFull
         case 2:
             usbipSpeed = USBIPConstants.speedHigh
-        case 3:
+        case 3, 4:
             usbipSpeed = USBIPConstants.speedSuper
         default:
             usbipSpeed = USBIPConstants.speedHigh

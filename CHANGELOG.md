@@ -1,5 +1,27 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.2.0] - 2026-11-01
+
+### Added
+- **Obsidian Precision Design System (Windows & macOS v3.2.0)**:
+  - Unified Obsidian Precision palette across Windows WPF (`App.xaml`, `ThemeService.cs`, `MainWindow.xaml`, `SettingsWindow.xaml`) and macOS SwiftUI (`Theme.swift`, `MainView.swift`, `MenuBarView.swift`, `SettingsView.swift`).
+  - Added dedicated `AccentForeground`, `DataGridBg`, `DataGridAltBg`, and `AccentButton` styles ensuring WCAG-compliant contrast in both Dark (`#D2F800` lime with `#0B0C0E` text) and Light (`#111827` slate with `#FFFFFF` text) themes.
+- **Unified TCP 3241 Dynamic Control Daemon (Windows, Linux, macOS)**:
+  - **Windows Server (`DiscoveryResponderService.cs`)**: Added TCP 3241 control listener supporting `LIST`, `BIND <busid>`, `UNBIND <busid>`, and `STATUS` alongside UDP 3241 LAN broadcast discovery.
+  - **Linux Server (`scripts/usbanywhere-ctl`)**: Added `/etc/usbanywhere/policy.json` Host Export Policy (`allowlist`/`blocklist`, VID:PID & BusID rules), composite child `bInterfaceClass` inspection, Valve Steam Controller (`28de:*`) detection, and USB Hub filtering.
+  - **macOS Server (`ControlServer.swift`, `IOKitDeviceManager.swift`, `URBHandler.swift`)**: Added POSIX TCP 3241 control daemon, shared `/tmp/usbanywhere-mac-state.json` IPC synchronization between CLI and daemon, auto-unbind on client disconnect, and full USB descriptor generation (`0x01`, `0x02`, `0x03`, `0x06`, `0x22`).
+
+### Fixed
+- **Fixed Auto-Unbind vs Auto-Bind Loop on Windows & Linux**:
+  - Windows Server now tracks devices released by `AutoUnbindOnDisconnect` (`_releasedByAutoUnbindBusIds`) so `AutoBindEnabled` never re-binds a device 2 seconds after client detachment until physical replug or manual share.
+  - Linux installer (`install-server-linux.sh`) now purges legacy `usbanywhere-autobind.service` units and normalizes CRLF line endings via `.gitattributes`.
+- **Fixed Windows Firewall Rule Scope for Dynamic Control & VPNs**:
+  - Updated `FirewallService.cs` to open TCP `3240,3241` and UDP `3241` across `localsubnet`, RFC1918 private ranges, and Tailscale/ZeroTier CGNAT (`100.64.0.0/10`).
+- **Fixed macOS CI Build & Bundle Execution**:
+  - Updated `.github/workflows/ci.yml` to invoke `.build/release/usbanywhere-server-mac` directly during headless CI verification so `NSApplication` bundle detection does not launch the GUI loop in CLI tests.
+
+---
+
 ## [3.1.0] - 2026-10-31
 
 ### Added

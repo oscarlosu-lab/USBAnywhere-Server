@@ -38,6 +38,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<LocalUsbDevice> _deviceCollection = new();
     private readonly HashSet<string> _autoBindingBusIds = new();
     private readonly HashSet<string> _autoUnbindingBusIds = new();
+    private readonly HashSet<string> _releasedByAutoUnbindBusIds = new();
     private readonly Dictionary<string, string> _previousDeviceStatuses = new();
     private readonly List<ServerLogEntry> _logHistory = new();
     private WinForms.NotifyIcon? _notifyIcon;
@@ -56,7 +57,7 @@ public partial class MainWindow : Window
         _usbipdService = new UsbipdService();
         _driverInstaller = new DriverInstaller();
         _updateService = new UpdateService();
-        _discoveryService = new DiscoveryResponderService();
+        _discoveryService = new DiscoveryResponderService(_usbipdService, () => Dispatcher.InvokeAsync(RefreshDeviceListAsync));
         _discoveryService.Start();
         _localization = new LocalizationService();
 
@@ -322,6 +323,7 @@ public partial class MainWindow : Window
             {
                 if (!incomingBusIds.Contains(_deviceCollection[i].BusId))
                 {
+                    _releasedByAutoUnbindBusIds.Remove(_deviceCollection[i].BusId);
                     _deviceCollection.RemoveAt(i);
                 }
             }
@@ -357,6 +359,7 @@ public partial class MainWindow : Window
                     if (wasAttached && isNowSharedIdle)
                     {
                         _autoUnbindingBusIds.Add(dev.BusId);
+                        _releasedByAutoUnbindBusIds.Add(dev.BusId);
                         AddLocalizedLog("log_autounbind_trigger", dev.DisplayName, dev.BusId);
                         NotificationService.ShowToast(
                             _localization.GetText("title", _currentLanguage),
@@ -383,6 +386,7 @@ public partial class MainWindow : Window
 
                 if (SettingsService.Current.AutoBindEnabled &&
                     dev.IsNotShared &&
+                    !_releasedByAutoUnbindBusIds.Contains(dev.BusId) &&
                     !string.IsNullOrWhiteSpace(dev.VidPid) &&
                     SettingsService.Current.AutoBindDevices.Contains(dev.VidPid) &&
                     !_autoBindingBusIds.Contains(dev.BusId))
@@ -575,6 +579,7 @@ public partial class MainWindow : Window
             btn.IsEnabled = false;
             try
             {
+                _releasedByAutoUnbindBusIds.Remove(busId);
                 var dev = _deviceCollection.FirstOrDefault(d => d.BusId == busId);
                 var success = await _usbipdService.BindDeviceAsync(busId);
                 if (success && dev != null)

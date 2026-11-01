@@ -10,6 +10,7 @@
         <SolidColorBrush x:Key="BgTertiary" Color="#16171B"/>
         <SolidColorBrush x:Key="AccentColor" Color="#D2F800"/>
         <SolidColorBrush x:Key="AccentHover" Color="#B8DA00"/>
+        <SolidColorBrush x:Key="AccentForeground" Color="#0B0C0E"/>
         <SolidColorBrush x:Key="HighlightColor" Color="#EF4444"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#EDEDED"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#8E919A"/>
@@ -17,7 +18,7 @@
         <SolidColorBrush x:Key="StatusSuccess" Color="#D2F800"/>
         <SolidColorBrush x:Key="StatusWarning" Color="#F59E0B"/>
         <SolidColorBrush x:Key="StatusError" Color="#EF4444"/>
-        <SolidColorBrush x:Key="StatusInfo" Color="#A1A1AA"/>
+        <SolidColorBrush x:Key="StatusInfo" Color="#00E5FF"/>
         <SolidColorBrush x:Key="DataGridBg" Color="#0B0C0E"/>
         <SolidColorBrush x:Key="DataGridAltBg" Color="#131417"/>
         <SolidColorBrush x:Key="DataGridHover" Color="#18191E"/>

@@ -17,9 +17,15 @@ public final class USBIPServer {
     private var serverSocket: Int32 = -1
     private var isRunning: Bool = false
     private let dispatchQueue = DispatchQueue(label: "com.usbanywhere.server.mac", attributes: .concurrent)
+    public var onLog: ((String) -> Void)?
     
     public init(port: UInt16 = USBIPConstants.defaultPort) {
         self.port = port
+    }
+    
+    private func emitLog(_ msg: String) {
+        print(msg)
+        onLog?(msg)
     }
     
     public func start() throws {
@@ -44,17 +50,25 @@ public final class USBIPServer {
         
         guard bindResult == 0 else {
             close(serverSocket)
-            throw NSError(domain: "USBIPServer", code: Int(errno), userInfo: [NSLocalizedDescriptionKey: "Failed to bind to port \(port) (requires sudo or port already in use)"])
+            serverSocket = -1
+            throw NSError(domain: "USBIPServer", code: Int(errno), userInfo: [NSLocalizedDescriptionKey: "Failed to bind to port \(port) (port already in use)"])
         }
         
         guard listen(serverSocket, 10) == 0 else {
             close(serverSocket)
+            serverSocket = -1
             throw NSError(domain: "USBIPServer", code: Int(errno), userInfo: [NSLocalizedDescriptionKey: "Failed to listen on socket"])
         }
         
         isRunning = true
-        print("🌐 USBAnywhere Server (macOS) listening on 0.0.0.0:\(port)")
-        print("   Ready for connections from USBAnywhere Client or Linux clients.")
+
+        // Ensure Dynamic Control API (TCP 3241), UDP Discovery (UDP 3241), and Bonjour mDNS are active
+        ControlServer.shared.start()
+        DiscoveryResponder.shared.start()
+        BonjourPublisher.shared.start(port: Int(port))
+
+        emitLog("🌐 USBAnywhere Server (macOS v3.2.0) listening on 0.0.0.0:\(port)")
+        emitLog("⚡ Dynamic Control API & Discovery active on TCP/UDP port 3241")
         
         while isRunning {
             var clientAddr = sockaddr_in()
@@ -71,7 +85,7 @@ public final class USBIPServer {
             }
             
             let clientIP = String(cString: inet_ntoa(clientAddr.sin_addr))
-            print("📡 Client connected from \(clientIP)")
+            emitLog("📡 Client connected from \(clientIP)")
             
             dispatchQueue.async {
                 self.handleClient(fd: clientFd, clientIP: clientIP)
@@ -81,6 +95,9 @@ public final class USBIPServer {
     
     public func stop() {
         isRunning = false
+        ControlServer.shared.stop()
+        DiscoveryResponder.shared.stop()
+        BonjourPublisher.shared.stop()
         if serverSocket >= 0 {
             close(serverSocket)
             serverSocket = -1
@@ -90,7 +107,7 @@ public final class USBIPServer {
     private func handleClient(fd: Int32, clientIP: String) {
         defer {
             close(fd)
-            print("🔌 Client disconnected: \(clientIP)")
+            emitLog("🔌 Client disconnected: \(clientIP)")
         }
         
         // 1. Management Handshake Loop
@@ -105,11 +122,11 @@ public final class USBIPServer {
             } else if command == USBIPConstants.opReqImport {
                 let success = handleImport(fd: fd, version: version)
                 if success {
-                    // Transition to URB streaming loop for the imported device
+                    // Transitioned and completed URB streaming loop for the imported device
                     return
                 }
             } else {
-                print("⚠️ Unknown management command opcode: \(String(format: "0x%04X", command))")
+                emitLog("⚠️ Unknown management command opcode: \(String(format: "0x%04X", command))")
                 return
             }
         }
@@ -122,7 +139,7 @@ public final class USBIPServer {
         let allDevices = IOKitDeviceManager.shared.enumerateDevices()
         let exportedDevices = allDevices.filter { $0.isBound }
         
-        print("📋 Sending device list: \(exportedDevices.count) exported devices")
+        emitLog("📋 Sending device list: \(exportedDevices.count) exported devices")
         let replyData = USBIPPackets.encodeDevlistReply(devices: exportedDevices)
         _ = writeExact(fd: fd, data: replyData)
     }
@@ -134,28 +151,51 @@ public final class USBIPServer {
         _ = buf.readUInt32() // status
         guard let requestedBusId = buf.readFixedString(length: USBIPConstants.maxBusIdLength) else { return false }
         
+        // Check policy and allow on-demand bind if not yet bound
+        let policyCheck = IOKitDeviceManager.shared.isDeviceExportAllowed(busId: requestedBusId)
+        guard policyCheck.allowed else {
+            emitLog("🛡️ Export blocked by policy for '\(requestedBusId)': \(policyCheck.reason)")
+            let errReply = USBIPPackets.encodeImportReply(device: nil, status: USBIPConstants.statusError)
+            _ = writeExact(fd: fd, data: errReply)
+            return false
+        }
+
+        if !IOKitDeviceManager.shared.isBound(busId: requestedBusId) {
+            _ = IOKitDeviceManager.shared.bindDevice(busId: requestedBusId, dynamic: true)
+        }
+
         let allDevices = IOKitDeviceManager.shared.enumerateDevices()
         guard let targetDev = allDevices.first(where: { $0.busId == requestedBusId && $0.isBound }) else {
-            print("❌ Requested busid '\(requestedBusId)' not found or not bound.")
+            emitLog("❌ Requested busid '\(requestedBusId)' not found.")
             let errReply = USBIPPackets.encodeImportReply(device: nil, status: USBIPConstants.statusError)
             _ = writeExact(fd: fd, data: errReply)
             return false
         }
         
-        print("🔗 Attaching device [\(targetDev.busId)] \(targetDev.displayName)...")
+        emitLog("🔗 Attaching device [\(targetDev.busId)] \(targetDev.displayName)...")
         targetDev.isClaimed = true
+        IOKitDeviceManager.shared.setClaimed(busId: targetDev.busId, claimed: true)
+
         let okReply = USBIPPackets.encodeImportReply(device: targetDev, status: USBIPConstants.statusOk)
         _ = writeExact(fd: fd, data: okReply)
         
-        // Enter URB processing loop
+        // Enter URB processing loop until client disconnects
         enterURBLoop(fd: fd, device: targetDev)
+
+        // Client disconnected: release claimed status and trigger Dynamic Auto-Unbind (Zero-Host-Lockout)
         targetDev.isClaimed = false
+        IOKitDeviceManager.shared.setClaimed(busId: targetDev.busId, claimed: false)
+
+        if !AutoBindManager.shared.isAutoBound(vidPid: targetDev.vidPidString) {
+            _ = IOKitDeviceManager.shared.unbindDevice(busId: targetDev.busId)
+            emitLog("🔄 [Auto-Unbind] Released [\(targetDev.busId)] back to local macOS host")
+        }
         return true
     }
     
     private func enterURBLoop(fd: Int32, device: USBDeviceInfo) {
         let handler = URBHandler(device: device)
-        print("⚡ Active URB streaming session started for [\(device.busId)]")
+        emitLog("⚡ Active URB streaming session started for [\(device.busId)]")
         
         while isRunning {
             // Read USBIP Command Header (48 bytes)
@@ -180,49 +220,50 @@ public final class USBIPServer {
                 }
                 
                 let retPacket = handler.handleSubmit(cmd: fullCmd)
-                guard writeExact(fd: fd, data: retPacket) else { break }
+                if !writeExact(fd: fd, data: retPacket) { break }
                 
             } else if cmdType == USBIPConstants.cmdUnlink {
-                // USBIP_CMD_UNLINK
                 guard let seqnum = buf.readUInt32(),
                       let devid = buf.readUInt32(),
-                      let _ = buf.readUInt32(),
+                      let direction = buf.readUInt32(),
                       let ep = buf.readUInt32(),
                       let _ = buf.readUInt32() else { break }
                 
-                // Return RET_UNLINK
+                // Send RET_UNLINK (48 bytes)
                 let retBuf = ByteBuffer()
                 retBuf.writeUInt32(USBIPConstants.retUnlink)
                 retBuf.writeUInt32(seqnum)
                 retBuf.writeUInt32(devid)
-                retBuf.writeUInt32(0) // direction
+                retBuf.writeUInt32(direction)
                 retBuf.writeUInt32(ep)
-                retBuf.writeInt32(0)  // status OK
-                retBuf.writeData(Data(repeating: 0, count: 28)) // padding
-                guard writeExact(fd: fd, data: retBuf.rawData) else { break }
+                retBuf.writeInt32(-104) // -ECONNRESET (standard Linux/USBIP unlink status)
+                retBuf.writeData(Data(repeating: 0, count: 24)) // padding to 48 bytes
+                
+                if !writeExact(fd: fd, data: retBuf.rawData) { break }
             } else {
-                print("⚠️ Unknown URB command type: \(cmdType)")
+                emitLog("⚠️ Unknown URB command: \(cmdType)")
                 break
             }
         }
-        print("🛑 URB streaming session ended for [\(device.busId)]")
+        
+        emitLog("🛑 URB streaming session ended for [\(device.busId)]")
     }
     
-    // MARK: - Low-level I/O Helpers
     private func readExact(fd: Int32, count: Int) -> Data? {
-        var result = Data(count: count)
+        var data = Data(count: count)
         var totalRead = 0
         
         while totalRead < count {
-            let bytesRemaining = count - totalRead
-            let bytesRead = result.withUnsafeMutableBytes { ptr -> Int in
+            let bytesRead = data.withUnsafeMutableBytes { ptr -> Int in
                 guard let base = ptr.baseAddress else { return -1 }
-                return read(fd, base.advanced(by: totalRead), bytesRemaining)
+                return recv(fd, base.advanced(by: totalRead), count - totalRead, 0)
             }
-            if bytesRead <= 0 { return nil }
+            if bytesRead <= 0 {
+                return nil
+            }
             totalRead += bytesRead
         }
-        return result
+        return data
     }
     
     private func writeExact(fd: Int32, data: Data) -> Bool {
@@ -230,12 +271,13 @@ public final class USBIPServer {
         let count = data.count
         
         while totalWritten < count {
-            let bytesRemaining = count - totalWritten
             let bytesWritten = data.withUnsafeBytes { ptr -> Int in
                 guard let base = ptr.baseAddress else { return -1 }
-                return write(fd, base.advanced(by: totalWritten), bytesRemaining)
+                return send(fd, base.advanced(by: totalWritten), count - totalWritten, 0)
             }
-            if bytesWritten <= 0 { return false }
+            if bytesWritten <= 0 {
+                return false
+            }
             totalWritten += bytesWritten
         }
         return true

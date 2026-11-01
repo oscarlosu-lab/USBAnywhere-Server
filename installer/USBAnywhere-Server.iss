@@ -3,7 +3,7 @@
 ; (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere-Server
 
 #define MyAppName "USBAnywhere Server"
-#define MyAppVersion "3.0.0"
+#define MyAppVersion "3.2.0"
 #define MyAppPublisher "oscarlosu-lab"
 #define MyAppURL "https://github.com/oscarlosu-lab/USBAnywhere-Server"
 #define MyAppExeName "USBAnywhere-Server.exe"

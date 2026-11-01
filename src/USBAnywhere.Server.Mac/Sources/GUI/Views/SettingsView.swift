@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// USBAnywhere Server for macOS - Settings & Preferences View
+// USBAnywhere Server for macOS - Settings & Preferences View (Obsidian Precision)
 // Copyright (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere-Server
 // Licensed under GPL v3
 // ─────────────────────────────────────────────────────────────────────────────
@@ -11,13 +11,14 @@ public struct SettingsView: View {
     @EnvironmentObject var vm: ServerViewModel
     @State private var portString: String = "3240"
     @State private var isLaunchdInstalled: Bool = false
+    @State private var protectLocalHid: Bool = false
     @State private var autoBoundList: [String] = []
 
-    private let bgDark = Color(red: 0.043, green: 0.047, blue: 0.055)
-    private let cardDark = Color(red: 0.075, green: 0.078, blue: 0.090)
-    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)
-    private let neonCyan = Color(red: 0.631, green: 0.631, blue: 0.667)
-    private let textMuted = Color(red: 0.557, green: 0.569, blue: 0.604)
+    private let bgDark = Color(red: 0.043, green: 0.047, blue: 0.055)     // #0B0C0E Carbon Obsidian
+    private let cardDark = Color(red: 0.075, green: 0.078, blue: 0.090)   // #131417 Surface Elevated
+    private let neonGreen = Color(red: 0.824, green: 0.973, blue: 0.0)    // #D2F800 Acid Lime Accent
+    private let neonCyan = Color(red: 0.0, green: 0.898, blue: 1.0)       // #00E5FF Electric Cyan
+    private let textMuted = Color(red: 0.631, green: 0.631, blue: 0.667)  // #A1A1AA Zinc-400
 
     public init() {}
 
@@ -29,20 +30,20 @@ public struct SettingsView: View {
                     Text("Server Settings & Configuration")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                    Text("Fine-tune network ports, auto-bind profiles, and launch daemon services.")
+                    Text("Fine-tune network ports, Zero-Host-Lockout policies, and launch daemon services.")
                         .font(.system(size: 12))
                         .foregroundColor(textMuted)
                 }
 
                 // Network & Daemon Configuration
                 VStack(alignment: .leading, spacing: 14) {
-                    Label("Network & Server Daemon", systemImage: "network")
+                    Label("Network & Dynamic Control Daemon", systemImage: "network")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(neonCyan)
 
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
-                            Text("TCP Server Port:")
+                            Text("TCP USB/IP Port:")
                                 .font(.system(size: 13))
                                 .foregroundColor(.white)
                             Spacer()
@@ -57,7 +58,7 @@ public struct SettingsView: View {
                                 }
                         }
 
-                        Text("Default USB/IP standard port is 3240. Changing port requires server restart.")
+                        Text("Default USB/IP standard port is 3240. On-Demand Control API & Discovery use TCP/UDP 3241.")
                             .font(.system(size: 11))
                             .foregroundColor(textMuted)
 
@@ -65,10 +66,10 @@ public struct SettingsView: View {
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Multi-Tier Discovery")
+                                Text("Multi-Tier Discovery & Dynamic Auto-Unbind")
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(.white)
-                                Text("Responds to UDP 3241 subnet broadcasts and advertises via Bonjour/mDNS (_usbanywhere._tcp)")
+                                Text("Listens on TCP/UDP 3241, advertises via Bonjour (_usbanywhere._tcp), and releases devices on disconnect")
                                     .font(.system(size: 11))
                                     .foregroundColor(textMuted)
                             }
@@ -79,6 +80,24 @@ public struct SettingsView: View {
                             Text("Active")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(neonGreen)
+                        }
+
+                        Divider().background(Color.white.opacity(0.1))
+
+                        Toggle(isOn: $protectLocalHid) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Protect Local HID Peripherals")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.white)
+                                Text("Prevents remote clients from grabbing local keyboards, mice, or gamepads")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(textMuted)
+                            }
+                        }
+                        .toggleStyle(.switch)
+                        .tint(neonGreen)
+                        .onChange(of: protectLocalHid) { newValue in
+                            IOKitDeviceManager.shared.updatePolicy(protectLocalHid: newValue)
                         }
                     }
                     .padding(14)
@@ -103,11 +122,16 @@ public struct SettingsView: View {
                                     .foregroundColor(textMuted)
                             }
                             Spacer()
-                            Button(isLaunchdInstalled ? "Uninstall Service" : "Install Service") {
-                                toggleLaunchd()
+                            Button(action: { toggleLaunchd() }) {
+                                Text(isLaunchdInstalled ? "Uninstall Service" : "Install Service")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(isLaunchdInstalled ? .white : .black)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(isLaunchdInstalled ? Color(red: 0.30, green: 0.12, blue: 0.12) : neonGreen)
+                                    .cornerRadius(6)
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(isLaunchdInstalled ? Color.red : Color(red: 0.15, green: 0.35, blue: 0.70))
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(14)
@@ -129,7 +153,7 @@ public struct SettingsView: View {
                                 vm.refreshDevices()
                             }
                             .buttonStyle(.plain)
-                            .font(.system(size: 11))
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundColor(.red)
                         }
                     }
@@ -137,7 +161,7 @@ public struct SettingsView: View {
                     if autoBoundList.isEmpty {
                         HStack {
                             Spacer()
-                            Text("No devices marked for auto-bind. Click 'Auto-Bind' on any device card in Dashboard to remember it.")
+                            Text("No devices pinned for static auto-bind. All devices use On-Demand Dynamic Binding by default.")
                                 .font(.system(size: 12))
                                 .foregroundColor(textMuted)
                                 .multilineTextAlignment(.center)
@@ -168,7 +192,7 @@ public struct SettingsView: View {
                                     .buttonStyle(.plain)
                                 }
                                 .padding(10)
-                                .background(Color(red: 0.08, green: 0.10, blue: 0.13))
+                                .background(Color(red: 0.055, green: 0.060, blue: 0.072))
                                 .cornerRadius(8)
                             }
                         }
@@ -180,11 +204,11 @@ public struct SettingsView: View {
 
                 // About & Hardware Parity
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("About USBAnywhere Server for macOS", systemImage: "info.circle")
+                    Label("About USBAnywhere Server for macOS v3.2.0", systemImage: "info.circle")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(neonCyan)
 
-                    Text("USBAnywhere macOS Server is an industrial-grade USB/IP daemon and GUI suite built natively in Swift & AppKit/SwiftUI. Provides feature parity with Windows Server, including IOKit enumeration, dynamic client handshakes, 8000 Hz polling ready, and multi-tier network discovery.")
+                    Text("USBAnywhere macOS Server is an industrial-grade USB/IP daemon and GUI suite built natively in Swift & AppKit/SwiftUI. Provides full feature parity with Windows and Linux servers, including IOKit composite interface enumeration, TCP 3241 On-Demand Control API, Zero-Host-Lockout auto-unbind, and multi-tier network discovery.")
                         .font(.system(size: 11))
                         .foregroundColor(textMuted)
                         .fixedSize(horizontal: false, vertical: true)
@@ -204,6 +228,7 @@ public struct SettingsView: View {
     private func loadSettings() {
         portString = "\(vm.serverPort)"
         autoBoundList = Array(AutoBindManager.shared.getAutoBoundList()).sorted()
+        protectLocalHid = IOKitDeviceManager.shared.getState().protectLocalHid
         let plistPath = "/Library/LaunchDaemons/com.usbanywhere.server.plist"
         isLaunchdInstalled = FileManager.default.fileExists(atPath: plistPath)
     }

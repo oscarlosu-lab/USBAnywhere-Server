@@ -22,6 +22,7 @@ public final class ServerViewModel: ObservableObject {
     @Published public var searchText: String = ""
     @Published public var autoBindCount: Int = 0
     @Published public var serverPort: UInt16 = 3240
+    @Published public var showingSettings: Bool = false
 
     private var server: USBIPServer?
     private var timer: Timer?
@@ -36,7 +37,12 @@ public final class ServerViewModel: ObservableObject {
     public func startServer(port: UInt16 = 3240) {
         guard !isServerActive else { return }
         self.serverPort = port
-        server = USBIPServer(port: port)
+        let srv = USBIPServer(port: port)
+        srv.onLog = { [weak self] msg in
+            self?.appendLog(msg)
+            self?.refreshDevices()
+        }
+        server = srv
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             do {
                 try self?.server?.start()
@@ -48,7 +54,7 @@ public final class ServerViewModel: ObservableObject {
             }
         }
         isServerActive = true
-        appendLog("✅ USBAnywhere Server active on TCP port \(port)")
+        appendLog("✅ USBAnywhere Server active on TCP port \(port) (Control API: 3241)")
     }
 
     public func stopServer() {
@@ -70,17 +76,19 @@ public final class ServerViewModel: ObservableObject {
         let rawDevices = IOKitDeviceManager.shared.enumerateDevices()
         let autoBound = AutoBindManager.shared.getAutoBoundList()
         
-        // Auto-export remembered devices
+        // Auto-export remembered pinned devices
         for dev in rawDevices {
             if autoBound.contains(dev.vidPidString.uppercased()) && !dev.isBound {
                 _ = IOKitDeviceManager.shared.bindDevice(busId: dev.busId)
                 dev.isBound = true
             }
         }
+        let claimedCount = rawDevices.filter { $0.isClaimed }.count
         
         DispatchQueue.main.async {
             self.devices = rawDevices
             self.autoBindCount = autoBound.count
+            self.activeClientsCount = claimedCount
         }
     }
 
@@ -90,6 +98,11 @@ public final class ServerViewModel: ObservableObject {
             device.isBound = false
             appendLog("⚪ Device unshared: \(device.displayName)")
         } else {
+            let check = IOKitDeviceManager.shared.isDeviceExportAllowed(busId: device.busId, device: device)
+            if !check.allowed {
+                appendLog("🛡️ Blocked by policy: \(check.reason)")
+                return
+            }
             _ = IOKitDeviceManager.shared.bindDevice(busId: device.busId)
             device.isBound = true
             appendLog("🟢 Device shared: \(device.displayName) on Bus \(device.busId)")
@@ -117,7 +130,7 @@ public final class ServerViewModel: ObservableObject {
             _ = IOKitDeviceManager.shared.bindDevice(busId: device.busId)
             device.isBound = true
         }
-        appendLog("📌 Auto-Bind \(isNowAutoBound ? "enabled" : "disabled") for [\(device.vidPidString)] \(device.productName ?? "")")
+        appendLog("📌 Auto-Bind \(isNowAutoBound ? "enabled" : "disabled") for [\(device.vidPidString)] \(device.cleanProductName)")
         refreshDevices()
     }
 
@@ -172,18 +185,20 @@ public final class ServerViewModel: ObservableObject {
     }
 
     private func startDiscoveryServices() {
+        ControlServer.shared.start()
         DiscoveryResponder.shared.start()
         BonjourPublisher.shared.start(port: Int(serverPort))
     }
 
     private func startBackgroundMonitoring() {
-        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             self?.refreshDevices()
         }
     }
 
     deinit {
         timer?.invalidate()
+        ControlServer.shared.stop()
         DiscoveryResponder.shared.stop()
         BonjourPublisher.shared.stop()
         stopServer()

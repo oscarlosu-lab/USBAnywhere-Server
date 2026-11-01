@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-USBAnywhere Server for macOS - Live TCP End-to-End Loopback Test
-Verifies that the compiled Swift binary boots on macOS Darwin, binds port 3240,
-and responds correctly to binary USB/IP protocol handshakes over TCP.
+USBAnywhere Server for macOS - Live TCP/UDP End-to-End Loopback Test
+Verifies that the compiled Swift binary boots on macOS Darwin, binds TCP 3240,
+TCP 3241 (Dynamic Control API), and UDP 3241 (Discovery Responder), and responds
+correctly to binary USB/IP protocol handshakes and dynamic control commands.
 """
+import json
 import socket
 import struct
 import sys
 import time
 import unittest
 
-def verify_live_usbip_handshake(host="127.0.0.1", port=3240):
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+
+def verify_live_usbip_handshake(host="127.0.0.1", port=3240, control_port=3241):
     print(f"Connecting to live macOS USB/IP server at {host}:{port}...")
     s = None
     for attempt in range(1, 6):
@@ -26,15 +32,11 @@ def verify_live_usbip_handshake(host="127.0.0.1", port=3240):
             if attempt == 5:
                 raise ConnectionError(f"Could not connect to macOS server on port {port}") from e
 
-    # USB/IP OP_REQ_DEVLIST packet:
-    # version: uint16 = 0x0111
-    # command: uint16 = 0x8005
-    # status: uint32 = 0
+    # 1. USB/IP OP_REQ_DEVLIST packet (TCP 3240)
     req = struct.pack(">HHI", 0x0111, 0x8005, 0)
     s.sendall(req)
     print("Sent OP_REQ_DEVLIST (0x8005) packet...")
 
-    # Read OP_REP_DEVLIST Header (8 bytes):
     header = s.recv(8)
     if len(header) < 8:
         raise ValueError(f"Expected 8 header bytes, received {len(header)}")
@@ -46,7 +48,6 @@ def verify_live_usbip_handshake(host="127.0.0.1", port=3240):
     assert command == 0x0005, f"Unexpected command: 0x{command:04X}"
     assert status == 0, f"Non-zero status: {status}"
 
-    # Read number of devices (uint32)
     ndev_bytes = s.recv(4)
     if len(ndev_bytes) < 4:
         raise ValueError(f"Expected 4 ndev bytes, received {len(ndev_bytes)}")
@@ -54,11 +55,31 @@ def verify_live_usbip_handshake(host="127.0.0.1", port=3240):
     ndev = struct.unpack(">I", ndev_bytes)[0]
     print(f"Server reports {ndev} exported USB devices.")
     s.close()
+
+    # 2. Dynamic Control API (TCP 3241)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as cs:
+        cs.settimeout(5.0)
+        cs.connect((host, control_port))
+        cs.sendall(b"LIST\n")
+        resp_raw = cs.recv(4096).decode("utf-8").strip()
+        resp = json.loads(resp_raw)
+        assert resp.get("status") == "OK", f"Control LIST failed: {resp_raw}"
+        print(f"TCP 3241 Dynamic Control LIST verified: {len(resp.get('devices', []))} devices")
+
+    # 3. Discovery Responder (UDP 3241)
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as us:
+        us.settimeout(3.0)
+        us.sendto(b"USBANYWHERE_DISCOVERY_PROBE", (host, control_port))
+        udp_data, _ = us.recvfrom(1024)
+        udp_text = udp_data.decode("utf-8").strip()
+        assert udp_text.startswith("USBANYWHERE_SERVER:"), f"Unexpected UDP reply: {udp_text}"
+        print(f"UDP 3241 Discovery Responder verified: {udp_text}")
+
     return True
+
 
 class TestMacOSLiveServer(unittest.TestCase):
     def test_protocol_packet_construction(self):
-        # Always testable offline
         req = struct.pack(">HHI", 0x0111, 0x8005, 0)
         self.assertEqual(len(req), 8)
         version, command, status = struct.unpack(">HHI", req)
@@ -66,11 +87,11 @@ class TestMacOSLiveServer(unittest.TestCase):
         self.assertEqual(command, 0x8005)
         self.assertEqual(status, 0)
 
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
         verify_live_usbip_handshake()
     else:
-        # Run live if server responds, otherwise run unit tests
         try:
             verify_live_usbip_handshake()
         except Exception:

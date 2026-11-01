@@ -23,7 +23,6 @@ public enum LaunchdService {
             <array>
                 <string>\(binaryPath)</string>
                 <string>serve</string>
-                <string>--auto-bind</string>
             </array>
             <key>RunAtLoad</key>
             <true/>
@@ -40,62 +39,76 @@ public enum LaunchdService {
     
     public static func install() -> Bool {
         guard geteuid() == 0 else {
-            print("❌ Root privileges required. Please run with 'sudo'.")
+            print("❌ Error: Installing the background service requires root privileges.")
+            print("💡 Run: sudo usbanywhere-server-mac install-service")
             return false
         }
         
-        let content = generatePlistContent()
+        let currentExec = CommandLine.arguments[0]
+        if currentExec != binaryPath && FileManager.default.fileExists(atPath: currentExec) {
+            do {
+                if FileManager.default.fileExists(atPath: binaryPath) {
+                    try FileManager.default.removeItem(atPath: binaryPath)
+                }
+                try FileManager.default.copyItem(atPath: currentExec, toPath: binaryPath)
+                _ = runCommand("/bin/chmod", args: ["755", binaryPath])
+                print("📦 Installed binary to \(binaryPath)")
+            } catch {
+                print("⚠️ Warning: Could not copy binary to \(binaryPath): \(error.localizedDescription)")
+            }
+        }
+        
         do {
+            let content = generatePlistContent()
             try content.write(toFile: plistPath, atomically: true, encoding: .utf8)
+            _ = runCommand("/usr/sbin/chown", args: ["root:wheel", plistPath])
+            _ = runCommand("/bin/chmod", args: ["644", plistPath])
             
-            // Set permissions (chown root:wheel & chmod 644)
-            _ = runCommand("chown", args: ["root:wheel", plistPath])
-            _ = runCommand("chmod", args: ["644", plistPath])
-            
-            // Load service
-            _ = runCommand("launchctl", args: ["unload", plistPath])
-            let result = runCommand("launchctl", args: ["load", "-w", plistPath])
-            
-            if result.exitCode == 0 {
-                print("✅ USBAnywhere Server service installed and started successfully.")
-                print("   Daemon: \(plistPath)")
-                print("   Logs:   \(logPath)")
+            _ = runCommand("/bin/launchctl", args: ["unload", plistPath])
+            let loadRes = runCommand("/bin/launchctl", args: ["load", "-w", plistPath])
+            if loadRes.exitCode == 0 {
+                print("✅ Launchd service installed and started (\(plistPath))")
+                print("📄 Logs available at: \(logPath)")
                 return true
             } else {
-                print("⚠️ launchctl returned non-zero exit code: \(result.exitCode)")
+                print("⚠️ launchctl load returned exit code \(loadRes.exitCode): \(loadRes.output)")
                 return false
             }
         } catch {
-            print("❌ Failed to write plist: \(error.localizedDescription)")
+            print("❌ Failed to write plist to \(plistPath): \(error.localizedDescription)")
             return false
         }
     }
     
     public static func uninstall() -> Bool {
         guard geteuid() == 0 else {
-            print("❌ Root privileges required. Please run with 'sudo'.")
+            print("❌ Error: Uninstalling the background service requires root privileges.")
+            print("💡 Run: sudo usbanywhere-server-mac uninstall-service")
             return false
         }
         
-        _ = runCommand("launchctl", args: ["unload", "-w", plistPath])
         if FileManager.default.fileExists(atPath: plistPath) {
-            try? FileManager.default.removeItem(atPath: plistPath)
+            _ = runCommand("/bin/launchctl", args: ["unload", plistPath])
+            do {
+                try FileManager.default.removeItem(atPath: plistPath)
+                print("✅ Launchd service removed (\(plistPath))")
+                return true
+            } catch {
+                print("❌ Failed to remove \(plistPath): \(error.localizedDescription)")
+                return false
+            }
+        } else {
+            print("ℹ️ Service is not currently installed at \(plistPath).")
+            return true
         }
-        print("✅ USBAnywhere Server service removed.")
-        return true
     }
     
-    @discardableResult
     private static func runCommand(_ executable: String, args: [String]) -> (output: String, exitCode: Int32) {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/which")
         let which = Process()
-        let pipe = Pipe()
-        which.executableURL = URL(fileURLWithPath: "/usr/bin/\(executable)")
-        if !FileManager.default.fileExists(atPath: "/usr/bin/\(executable)") {
-            which.executableURL = URL(fileURLWithPath: "/bin/\(executable)")
-        }
+        which.executableURL = URL(fileURLWithPath: executable)
         which.arguments = args
+        
+        let pipe = Pipe()
         which.standardOutput = pipe
         which.standardError = pipe
         do {

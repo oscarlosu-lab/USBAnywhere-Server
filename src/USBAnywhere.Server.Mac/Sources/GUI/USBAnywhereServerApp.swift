@@ -23,6 +23,7 @@ public struct USBAnywhereServerApp: App {
             ServerDashboardView()
                 .environmentObject(viewModel)
                 .frame(minWidth: 850, minHeight: 550)
+                .preferredColorScheme(.dark)
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
@@ -41,6 +42,7 @@ public struct USBAnywhereServerApp: App {
                     #if os(macOS)
                     NSApp.activate(ignoringOtherApps: true)
                     openWindow(id: "dashboard")
+                    viewModel.showingSettings = true
                     #endif
                 }
             )
@@ -52,7 +54,8 @@ public struct USBAnywhereServerApp: App {
         Settings {
             SettingsView()
                 .environmentObject(viewModel)
-                .frame(width: 500, height: 420)
+                .frame(width: 520, height: 460)
+                .preferredColorScheme(.dark)
         }
     }
 }

@@ -72,11 +72,11 @@ public static class FirewallService
             }
             else
             {
-                remoteIpClause = "remoteip=localsubnet";
+                remoteIpClause = "remoteip=localsubnet,100.64.0.0/10,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16";
             }
 
             var inboundResult = await RunNetshCommandAsync(
-                $"advfirewall firewall add rule name=\"{RuleName}\" dir=in action=allow protocol=tcp localport={Port} profile=private,domain {remoteIpClause}");
+                $"advfirewall firewall add rule name=\"{RuleName}\" dir=in action=allow protocol=tcp localport={Port},{DiscoveryPort} profile=private,domain {remoteIpClause}");
             await RunNetshCommandAsync(
                 $"advfirewall firewall add rule name=\"{RuleNameUdp}\" dir=in action=allow protocol=udp localport={DiscoveryPort} profile=private,domain {remoteIpClause}");
 

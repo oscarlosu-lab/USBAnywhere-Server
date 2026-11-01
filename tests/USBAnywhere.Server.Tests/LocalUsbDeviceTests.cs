@@ -1,3 +1,8 @@
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 using USBAnywhere.Server.Models;
 using USBAnywhere.Server.Services;
 using Xunit;
@@ -52,5 +57,41 @@ public class LocalUsbDeviceTests
     {
         var typeName = DeviceIconHelper.GetTypeName(0, 0, description);
         Assert.Equal(expectedType, typeName);
+    }
+
+    [Fact]
+    public async Task DiscoveryResponderService_TcpAndUdpControlApi_RespondsValidJson()
+    {
+        using var service = new DiscoveryResponderService();
+        service.Start();
+        await Task.Delay(100);
+
+        // Test TCP 3241 STATUS
+        using (var tcp = new TcpClient())
+        {
+            await tcp.ConnectAsync(IPAddress.Loopback, 3241);
+            var stream = tcp.GetStream();
+            var cmd = Encoding.UTF8.GetBytes("STATUS\n");
+            await stream.WriteAsync(cmd, 0, cmd.Length);
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            var json = await reader.ReadLineAsync();
+            Assert.NotNull(json);
+            Assert.Contains("\"status\":\"OK\"", json);
+            Assert.Contains("\"platform\":\"windows\"", json);
+        }
+
+        // Test TCP 3241 LIST
+        using (var tcp = new TcpClient())
+        {
+            await tcp.ConnectAsync(IPAddress.Loopback, 3241);
+            var stream = tcp.GetStream();
+            var cmd = Encoding.UTF8.GetBytes("LIST\n");
+            await stream.WriteAsync(cmd, 0, cmd.Length);
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            var json = await reader.ReadLineAsync();
+            Assert.NotNull(json);
+            Assert.Contains("\"status\":\"OK\"", json);
+            Assert.Contains("\"devices\":", json);
+        }
     }
 }
