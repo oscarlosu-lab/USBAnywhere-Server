@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.2.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
+**v3.3.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
 
 **Share local USB peripherals from Windows PCs and Apple Macs over your network — Zero hassle.**
 
