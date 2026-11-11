@@ -36,7 +36,7 @@ done
 
 cat << 'EOF' > "${WORK_DIR}/Kbuild"
 obj-m += usbip-host.o
-usbip-host-y := stub_dev.o stub_main.o stub_rx.o stub_tx.o usbip_common.o
+usbip-host-y := stub_dev.o stub_main.o stub_rx.o stub_tx.o
 EOF
 
 make -C "${KBUILD_DIR}" M="${WORK_DIR}" modules
