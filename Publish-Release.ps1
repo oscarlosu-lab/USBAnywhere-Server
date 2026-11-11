@@ -2,7 +2,7 @@
 # Automates the release process for USBAnywhere Server v3.2.0
 # (c) 2025-2026 oscarlosu-lab
 
-$version = "3.3.0"
+$version = "3.3.1"
 $repoRoot = $PSScriptRoot
 $projectPath = Join-Path $repoRoot "src\USBAnywhere.Server"
 $releasePath = Join-Path $repoRoot "release"

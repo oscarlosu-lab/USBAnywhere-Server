@@ -1,5 +1,16 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.3.1] - 2026-11-11
+
+### Fixed
+- **Linux `usbanywhere-ctl` Bind/Unbind Race & `SDEV_ST_ERROR` Recovery (Issue #9)**:
+  - Added per-`busid` `threading.Lock`, `udevadm settle`, and real `/sys/bus/usb/drivers/usbip-host/<busid>/usbip_status` verification in `share_device()`.
+  - Waits for `SDEV_ST_USED` (`2`) / `SDEV_ST_ERROR` (`3`) settlement and automatically unbinds/retries stalled `SDEV_ST_ERROR` devices, fixing re-attach failures after USBIP detach.
+- **Raspberry Pi `dwc_otg` Kernel Patch (`patches/rpi-dwc-usbip-host/`, Issue #9)**:
+  - Fixed `usbip-host-y` Kbuild objects in `build-patched-usbip-host.sh` (`stub_dev.o stub_main.o stub_rx.o stub_tx.o`, omitting `usbip_common.o`) and regenerated `SHA256SUMS.txt`.
+- **macOS Server (`USBAnywhere.Server.Mac`)**:
+  - Updated advertised Bonjour/log/UI version metadata to `3.3.1`.
+
 ## [3.3.0] - 2026-11-10
 
 ### Added
