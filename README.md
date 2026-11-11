@@ -12,7 +12,7 @@ A unified desktop server suite combining:
 
 Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.2.0)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -39,7 +39,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ## 🚀 Quick Start — Windows Server
 
-1. Download `USBAnywhere-Server_Setup_v3.2.0.exe` or the portable ZIP from [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.2.0).
+1. Download `USBAnywhere-Server_Setup_v3.3.0.exe` or the portable ZIP from [USBAnywhere Server Releases (v3.3.0)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.0).
 2. Run `USBAnywhere-Server.exe` as Administrator.
 3. Click **📤 Share** on any device (or **⚡ Share All**).
 4. Click the green **IP badge** in the header to copy your server IP address.
@@ -64,12 +64,21 @@ See [macOS User Guide (English)](docs/USAGE_MACOS_EN.md) / [Guía de macOS (Espa
 
 ---
 
-## 🐧 Quick Start — Linux Server (Debian/Ubuntu/Raspberry Pi)
+## 🐧 Quick Start — Linux Server & Client (`usbanywhere-ctl` v3.3.0)
 
 On your Linux machine or Raspberry Pi, open **Terminal** and run:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oscarlosu-lab/USBAnywhere-Server/main/scripts/install-server-linux.sh | sudo bash
+```
+
+**Using `usbanywhere-ctl` as a Linux Client (`vhci_hcd` + On-Demand `TCP 3241`)**:
+```bash
+sudo usbanywhere-ctl scan                        # Discover USBAnywhere servers on LAN & VPN
+sudo usbanywhere-ctl remote 192.168.1.50         # List exported + On-Demand USB devices on remote server
+sudo usbanywhere-ctl connect 192.168.1.50 1-1.4  # Dynamically bind & attach a remote USB peripheral
+sudo usbanywhere-ctl ports                       # Show attached virtual client USB ports
+sudo usbanywhere-ctl disconnect all              # Detach & release device back to remote host
 ```
 
 ---

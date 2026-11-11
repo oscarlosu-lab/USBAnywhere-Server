@@ -12,7 +12,7 @@ Una suite de servidor de escritorio unificada que combina:
 
 Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.2.0)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.0)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -39,7 +39,7 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 
 ## 🚀 Inicio Rápido — Servidor Windows
 
-1. Descarga `USBAnywhere-Server_Setup_v3.2.0.exe` o el archivo ZIP portable desde [USBAnywhere Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Downloads/releases/tag/server-v3.2.0).
+1. Descarga `USBAnywhere-Server_Setup_v3.3.0.exe` o el archivo ZIP portable desde [USBAnywhere Server Releases (v3.3.0)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.0).
 2. Ejecuta `USBAnywhere-Server.exe` como Administrador.
 3. Haz clic en **📤 Compartir** en cualquier periférico (o en **⚡ Compartir Todo**).
 4. Haz clic en la **etiqueta verde con la IP** en la barra superior para copiar la dirección de tu servidor.
@@ -64,12 +64,21 @@ Consulta el [Manual de macOS en Español](docs/USAGE_MACOS_ES.md) o en [Inglés]
 
 ---
 
-## 🐧 Inicio Rápido — Servidor Linux (Debian/Ubuntu/Raspberry Pi)
+## 🐧 Inicio Rápido — Servidor y Cliente Linux (`usbanywhere-ctl` v3.3.0)
 
 En tu equipo Linux o Raspberry Pi, abre la **Terminal** y ejecuta:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oscarlosu-lab/USBAnywhere-Server/main/scripts/install-server-linux.sh | sudo bash
+```
+
+**Uso de `usbanywhere-ctl` como Cliente Linux (`vhci_hcd` + On-Demand `TCP 3241`)**:
+```bash
+sudo usbanywhere-ctl scan                        # Descubrir servidores USBAnywhere en LAN y VPN
+sudo usbanywhere-ctl remote 192.168.1.50         # Listar dispositivos USB remotos (exportados + On-Demand)
+sudo usbanywhere-ctl connect 192.168.1.50 1-1.4  # Vincular dinámicamente y conectar el periférico remoto
+sudo usbanywhere-ctl ports                       # Ver puertos virtuales USB conectados localmente
+sudo usbanywhere-ctl disconnect all              # Desconectar y devolver el periférico al host remoto
 ```
 
 ---
