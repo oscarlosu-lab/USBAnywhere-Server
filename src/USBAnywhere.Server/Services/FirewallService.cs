@@ -24,7 +24,8 @@ public static class FirewallService
 
     public static bool IsRuleConfigured()
     {
-        return CheckRule(RuleName) || CheckRule(LegacyRuleName);
+        if (CheckRule(RuleName)) return true;
+        return !string.Equals(LegacyRuleName, RuleName, StringComparison.OrdinalIgnoreCase) && CheckRule(LegacyRuleName);
     }
 
     private static bool CheckRule(string ruleName)
@@ -128,7 +129,8 @@ public static class FirewallService
             LogService.Info("Removing firewall rule...");
 
             var r1 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{RuleName}\"");
-            var r2 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{LegacyRuleName}\"");
+            var r2 = !string.Equals(LegacyRuleName, RuleName, StringComparison.OrdinalIgnoreCase)
+                && await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{LegacyRuleName}\"");
             var r3 = await RunNetshCommandAsync($"advfirewall firewall delete rule name=\"{RuleNameUdp}\"");
             var result = r1 || r2 || r3;
 

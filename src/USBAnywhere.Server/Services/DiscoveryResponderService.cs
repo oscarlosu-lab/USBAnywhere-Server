@@ -259,11 +259,12 @@ public class DiscoveryResponderService : IDisposable
                 else if (cmd == "STATUS")
                 {
                     var devs = _usbipdService != null ? await _usbipdService.GetDevicesAsync() : new();
+                    var version = typeof(DiscoveryResponderService).Assembly.GetName().Version?.ToString(3) ?? "3.3.1";
                     await WriteJsonAsync(stream, new
                     {
                         status = "OK",
                         platform = "windows",
-                        version = "3.2.0",
+                        version,
                         hostname = Environment.MachineName,
                         total_devices = devs.Count,
                         exported_count = devs.Count(d => d.IsExported)

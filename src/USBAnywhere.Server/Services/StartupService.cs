@@ -80,7 +80,8 @@ public static class StartupService
             }
 
             using var key = Registry.CurrentUser.OpenSubKey(RegistryKey, true);
-            key?.DeleteValue(LegacyAppName, false);
+            if (!string.Equals(LegacyAppName, AppName, StringComparison.OrdinalIgnoreCase))
+                key?.DeleteValue(LegacyAppName, false);
             if (scheduledTaskCreated)
             {
                 // Avoid duplicate launch: remove HKCU Run entry when elevated scheduled task succeeds
@@ -109,7 +110,7 @@ public static class StartupService
     {
         try
         {
-            foreach (var tn in new[] { TaskName, LegacyTaskName })
+            foreach (var tn in new[] { TaskName, LegacyTaskName }.Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 var psi = new ProcessStartInfo
                 {
@@ -125,8 +126,10 @@ public static class StartupService
             }
 
             using var key = Registry.CurrentUser.OpenSubKey(RegistryKey, true);
-            key?.DeleteValue(AppName, false);
-            key?.DeleteValue(LegacyAppName, false);
+            foreach (var appName in new[] { AppName, LegacyAppName }.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                key?.DeleteValue(appName, false);
+            }
 
             SettingsService.Current.StartWithWindows = false;
             SettingsService.Save();

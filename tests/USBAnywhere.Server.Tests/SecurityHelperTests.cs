@@ -1,3 +1,4 @@
+using System.Text.Json;
 using USBAnywhere.Server.Services;
 using Xunit;
 
@@ -45,5 +46,22 @@ public class SecurityHelperTests
     {
         bool result = SecurityHelper.IsSafePath(path);
         Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void UpdateService_SelectServerAsset_PrefersServerSetupExe()
+    {
+        using var doc = JsonDocument.Parse(
+            """
+            [
+              {"name":"USBAnywhere_Setup_v3.3.1.exe","browser_download_url":"https://example.com/client.exe"},
+              {"name":"USBAnywhere-Server_Setup_v3.3.1.exe","browser_download_url":"https://example.com/server.exe"},
+              {"name":"SHA256SUMS.txt","browser_download_url":"https://example.com/sums.txt"}
+            ]
+            """);
+
+        var (url, name) = UpdateService.SelectServerAsset(doc.RootElement, isPortable: false);
+        Assert.Equal("USBAnywhere-Server_Setup_v3.3.1.exe", name);
+        Assert.Equal("https://example.com/server.exe", url);
     }
 }

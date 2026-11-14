@@ -15,30 +15,41 @@ namespace USBAnywhere.Server.Services;
 public class UpdateService
 {
     private const string GITHUB_REPO = "oscarlosu-lab/USBAnywhere-Server";
+    private const string GITHUB_MONOREPO = "oscarlosu-lab/USBAnywhere";
     private static readonly string APP_VERSION = System.Reflection.Assembly.GetExecutingAssembly()
-        .GetName().Version?.ToString(3) ?? "3.0.0";
+        .GetName().Version?.ToString(3) ?? "3.3.1";
 
     public async Task<UpdateInfo> CheckForUpdatesAsync()
     {
         try
         {
             using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-            client.DefaultRequestHeaders.Add("User-Agent", "USBAnywhere-Server");
+            client.DefaultRequestHeaders.Add("User-Agent", $"USBAnywhere-Server/{APP_VERSION}");
 
-            var apiUrl = $"https://api.github.com/repos/{GITHUB_REPO}/releases/latest";
-            var response = await client.GetStringAsync(apiUrl);
-
-            var release = JsonSerializer.Deserialize<GitHubRelease>(response, new JsonSerializerOptions
+            string? response = null;
+            foreach (var repo in new[] { GITHUB_REPO, GITHUB_MONOREPO })
             {
-                PropertyNameCaseInsensitive = true
-            });
+                var apiUrl = $"https://api.github.com/repos/{repo}/releases/latest";
+                using var res = await client.GetAsync(apiUrl);
+                if (res.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    continue;
 
-            if (release == null)
+                res.EnsureSuccessStatusCode();
+                response = await res.Content.ReadAsStringAsync();
+                break;
+            }
+
+            if (string.IsNullOrWhiteSpace(response))
             {
                 return new UpdateInfo { UpdateAvailable = false, CurrentVersion = APP_VERSION };
             }
 
-            var latestVersion = release.TagName?.TrimStart('v') ?? "0.0.0";
+            using var doc = JsonDocument.Parse(response);
+            var root = doc.RootElement;
+
+            var tagName = root.TryGetProperty("tag_name", out var tagProp) ? tagProp.GetString() : null;
+            var releaseBody = root.TryGetProperty("body", out var bodyProp) ? bodyProp.GetString() : null;
+            var latestVersion = tagName?.TrimStart('v') ?? "0.0.0";
             var currentVersion = APP_VERSION;
 
             var canParseLatest = Version.TryParse(latestVersion, out var latest);
@@ -46,40 +57,33 @@ public class UpdateService
 
             if (canParseLatest && canParseCurrent && latest! > current!)
             {
-                GitHubAsset? targetAsset;
+                string? downloadUrl = null;
+                string? installerName = null;
+                string? sumsUrl = null;
 
-                if (PathService.IsPortable)
+                if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
                 {
-                    targetAsset = release.Assets?.FirstOrDefault(a =>
-                        a.Name?.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) == true &&
-                        a.Name?.Contains("x64", StringComparison.OrdinalIgnoreCase) == true)
-                        ?? release.Assets?.FirstOrDefault(a =>
-                        a.Name?.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) == true);
+                    (downloadUrl, installerName) = SelectServerAsset(assetsProp, PathService.IsPortable);
+                    foreach (var asset in assetsProp.EnumerateArray())
+                    {
+                        var assetName = asset.TryGetProperty("name", out var nProp) ? nProp.GetString() : null;
+                        if (assetName?.Equals("SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            sumsUrl = asset.TryGetProperty("browser_download_url", out var uProp) ? uProp.GetString() : null;
+                            break;
+                        }
+                    }
                 }
-                else
-                {
-                    targetAsset = release.Assets?.FirstOrDefault(a =>
-                        a.Name?.Contains("Setup", StringComparison.OrdinalIgnoreCase) == true &&
-                        a.Name?.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) == true);
-                }
-
-                // Fallback to any Setup.exe if ZIP not found
-                targetAsset ??= release.Assets?.FirstOrDefault(a =>
-                    a.Name?.Contains("Setup", StringComparison.OrdinalIgnoreCase) == true &&
-                    a.Name?.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) == true);
-
-                var sumsAsset = release.Assets?.FirstOrDefault(a =>
-                    a.Name?.Equals("SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase) == true);
 
                 return new UpdateInfo
                 {
                     UpdateAvailable = true,
                     LatestVersion = latestVersion,
                     CurrentVersion = currentVersion,
-                    DownloadUrl = targetAsset?.BrowserDownloadUrl,
-                    InstallerName = targetAsset?.Name,
-                    Sha256SumsUrl = sumsAsset?.BrowserDownloadUrl,
-                    ReleaseNotes = release.Body
+                    DownloadUrl = downloadUrl,
+                    InstallerName = installerName,
+                    Sha256SumsUrl = sumsUrl,
+                    ReleaseNotes = releaseBody
                 };
             }
 
@@ -99,6 +103,94 @@ public class UpdateService
                 Error = ex.Message
             };
         }
+    }
+
+    public static (string? url, string? name) SelectServerAsset(JsonElement assetsArray, bool isPortable = false)
+    {
+        if (assetsArray.ValueKind != JsonValueKind.Array)
+            return (null, null);
+
+        var items = new List<(string Name, string Url)>();
+        foreach (var asset in assetsArray.EnumerateArray())
+        {
+            var name = asset.TryGetProperty("name", out var nProp) ? nProp.GetString() : null;
+            var url = asset.TryGetProperty("browser_download_url", out var uProp) ? uProp.GetString() : null;
+            if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(url))
+            {
+                items.Add((name, url));
+            }
+        }
+
+        if (items.Count == 0)
+            return (null, null);
+
+        bool hasServerTaggedAssets = items.Any(a => a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase));
+        var archTag = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64
+            ? "arm64"
+            : "x64";
+
+        if (isPortable)
+        {
+            var match = items.FirstOrDefault(a =>
+                            a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                            a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase) &&
+                            a.Name.Contains(archTag, StringComparison.OrdinalIgnoreCase))
+                        is { Name: not null } m1 ? m1 :
+                        items.FirstOrDefault(a =>
+                            a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                            a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(match.Name))
+                return (match.Url, match.Name);
+
+            if (!hasServerTaggedAssets)
+            {
+                match = items.FirstOrDefault(a =>
+                            a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                            a.Name.Contains(archTag, StringComparison.OrdinalIgnoreCase))
+                        is { Name: not null } m2 ? m2 :
+                        items.FirstOrDefault(a => a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+                if (!string.IsNullOrEmpty(match.Name))
+                    return (match.Url, match.Name);
+            }
+        }
+
+        var selected = items.FirstOrDefault(a =>
+            a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.Contains("Setup", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(selected.Name))
+            return (selected.Url, selected.Name);
+
+        selected = items.FirstOrDefault(a =>
+            a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(selected.Name))
+            return (selected.Url, selected.Name);
+
+        selected = items.FirstOrDefault(a =>
+            a.Name.Contains("Server", StringComparison.OrdinalIgnoreCase) &&
+            a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(selected.Name))
+            return (selected.Url, selected.Name);
+
+        if (!hasServerTaggedAssets)
+        {
+            selected = items.FirstOrDefault(a =>
+                a.Name.Contains("Setup", StringComparison.OrdinalIgnoreCase) &&
+                a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(selected.Name))
+                return (selected.Url, selected.Name);
+
+            selected = items.FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(selected.Name))
+                return (selected.Url, selected.Name);
+
+            selected = items.FirstOrDefault(a => a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(selected.Name))
+                return (selected.Url, selected.Name);
+        }
+
+        return (null, null);
     }
 
     public async Task<OperationResult> StartUpdateAsync(string downloadUrl, string installerName, string? sha256SumsUrl = null)
