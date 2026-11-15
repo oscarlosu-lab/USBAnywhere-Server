@@ -54,14 +54,14 @@ public class SecurityHelperTests
         using var doc = JsonDocument.Parse(
             """
             [
-              {"name":"USBAnywhere_Setup_v3.3.1.exe","browser_download_url":"https://example.com/client.exe"},
-              {"name":"USBAnywhere-Server_Setup_v3.3.1.exe","browser_download_url":"https://example.com/server.exe"},
+              {"name":"USBAnywhere_Setup_v3.4.0.exe","browser_download_url":"https://example.com/client.exe"},
+              {"name":"USBAnywhere-Server_Setup_v3.3.2.exe","browser_download_url":"https://example.com/server.exe"},
               {"name":"SHA256SUMS.txt","browser_download_url":"https://example.com/sums.txt"}
             ]
             """);
 
         var (url, name) = UpdateService.SelectServerAsset(doc.RootElement, isPortable: false);
-        Assert.Equal("USBAnywhere-Server_Setup_v3.3.1.exe", name);
+        Assert.Equal("USBAnywhere-Server_Setup_v3.3.2.exe", name);
         Assert.Equal("https://example.com/server.exe", url);
     }
 }

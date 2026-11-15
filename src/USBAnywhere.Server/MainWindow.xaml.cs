@@ -129,18 +129,55 @@ public partial class MainWindow : Window
             Visible = true
         };
 
+        System.Drawing.Icon? loadedIcon = null;
+
+        // 1. Try embedded WPF pack resource first (works in single-file publish & installer)
         try
         {
-            var exePath = Process.GetCurrentProcess().MainModule?.FileName;
-            if (!string.IsNullOrEmpty(exePath))
+            var resInfo = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/icon.ico"));
+            if (resInfo?.Stream != null)
             {
-                _notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(exePath);
+                using var s = resInfo.Stream;
+                loadedIcon = new System.Drawing.Icon(s, WinForms.SystemInformation.SmallIconSize);
             }
         }
         catch (Exception ex)
         {
-            LogService.Debug($"NotifyIcon icon extraction skipped: {ex.Message}");
+            LogService.Debug($"NotifyIcon pack resource load skipped: {ex.Message}");
         }
+
+        // 2. Fallback to icon.ico on disk
+        if (loadedIcon == null)
+        {
+            try
+            {
+                var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    using var iconStream = new FileStream(iconPath, FileMode.Open, FileAccess.Read);
+                    loadedIcon = new System.Drawing.Icon(iconStream, WinForms.SystemInformation.SmallIconSize);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.Debug($"NotifyIcon disk icon load skipped: {ex.Message}");
+            }
+        }
+
+        // 3. Fallback to executable's associated Win32 icon
+        if (loadedIcon == null && !string.IsNullOrEmpty(Environment.ProcessPath) && File.Exists(Environment.ProcessPath))
+        {
+            try
+            {
+                loadedIcon = System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath);
+            }
+            catch (Exception ex)
+            {
+                LogService.Debug($"NotifyIcon icon extraction skipped: {ex.Message}");
+            }
+        }
+
+        _notifyIcon.Icon = loadedIcon ?? System.Drawing.SystemIcons.Application;
 
         _notifyIcon.DoubleClick += (s, e) => RestoreWindow();
 
@@ -918,8 +955,13 @@ public partial class MainWindow : Window
 
         if (_notifyIcon != null)
         {
-            _notifyIcon.Visible = false;
-            _notifyIcon.Dispose();
+            try
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+            }
+            catch { }
+            _notifyIcon = null;
         }
 
         base.OnClosed(e);

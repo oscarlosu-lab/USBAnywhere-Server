@@ -1,5 +1,15 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.3.2] - 2026-11-15
+
+### Fixed
+- **Windows 11 Multi-Size System Tray Icon (`MainWindow.InitializeNotifyIcon`)**:
+  - Added `<Resource Include="icon.ico" />` in `USBAnywhere.Server.csproj` and updated `InitializeNotifyIcon()` to load `icon.ico` using `WinForms.SystemInformation.SmallIconSize` (pack URI → disk `icon.ico` → associated Win32 icon → `SystemIcons.Application`), preventing blank or clipped notification tray icons on Windows 11 builds.
+- **Linux `usbip-host` Control IN `URB_SHORT_NOT_OK` Kernel Patch (`patches/rpi-dwc-usbip-host/`)**:
+  - Added `04-clear-short-not-ok.patch`, updated `build-patched-usbip-host.sh`, `README.md`, and `SHA256SUMS.txt` so `masking_bogus_flags()` clears `URB_SHORT_NOT_OK` on Control URBs while preserving short-read rejection only on Bulk/Interrupt IN endpoints.
+- **macOS Server (`USBAnywhere.Server.Mac`) & Version Metadata**:
+  - Updated version strings across Windows/macOS UI, Bonjour TXT metadata, installer, and `usbanywhere-ctl` to `3.3.2`.
+
 ## [3.3.1] - 2026-11-11
 
 ### Fixed

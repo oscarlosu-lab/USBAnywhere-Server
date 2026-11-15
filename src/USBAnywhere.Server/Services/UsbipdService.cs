@@ -7,6 +7,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 using USBAnywhere.Server.Models;
 
 namespace USBAnywhere.Server.Services;
@@ -45,7 +46,7 @@ public class UsbipdService : IDisposable
             _usbipdPath = "usbipd.exe";
             IsUsbipdAvailable = true;
         }
-        else if (File.Exists(bundledPath))
+        else if (File.Exists(bundledPath) && IsUsbipdRegistryPresent())
         {
             _usbipdPath = bundledPath;
             IsUsbipdAvailable = CheckExecutable(bundledPath);
@@ -54,6 +55,19 @@ public class UsbipdService : IDisposable
         {
             _usbipdPath = "usbipd.exe";
             IsUsbipdAvailable = false;
+        }
+    }
+
+    private static bool IsUsbipdRegistryPresent()
+    {
+        try
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\usbipd-win");
+            return key != null;
+        }
+        catch
+        {
+            return false;
         }
     }
 

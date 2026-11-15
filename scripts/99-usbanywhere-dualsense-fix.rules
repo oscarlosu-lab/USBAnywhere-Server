@@ -3,7 +3,7 @@
 # Copyright (c) 2025-2026 oscarlosu-lab - https://github.com/oscarlosu-lab/USBAnywhere
 # Licensed under GPL v3
 #
-# Prevents upstream Linux kernel usbip_host oops/panic on ARM/SBCs (e.g. Pi Zero 2 W)
+# Prevents Linux kernel usbip_host oops/panic on ARM/SBCs (e.g. Pi Zero 2 W)
 # when serializing isochronous audio streaming descriptors over TCP.
 # Matches usb_interface child nodes via parent ATTRS{idVendor}/ATTRS{idProduct}
 # and disables all USB Audio Class (bInterfaceClass=="01") interfaces regardless

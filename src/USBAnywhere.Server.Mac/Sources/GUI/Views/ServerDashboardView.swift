@@ -154,7 +154,7 @@ public struct ServerDashboardView: View {
                     Text("USBAnywhere Server")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.white)
-                    Text("macOS v3.3.1")
+                    Text("macOS v3.3.2")
                         .font(.system(size: 10, weight: .bold))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
