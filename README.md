@@ -21,6 +21,8 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 [![Reddit Community](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Project-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/oscarlosu)
 
+> **Need the Client instead?** Install **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** on the Windows/Linux machine where you want to *use* the remote USB device. (Linux/Raspberry Pi hosts use `scripts/install-server.sh` from that repo; `USBAnywhere-Server` is only for **Windows & macOS** host machines, and `SnakeUSBIP` is a separate sibling distribution with its own release channel.)
+
 ---
 
 ## ✨ Features
