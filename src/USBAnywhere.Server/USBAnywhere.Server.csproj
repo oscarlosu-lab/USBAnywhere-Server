@@ -31,7 +31,7 @@
   <ItemGroup>
     <!-- USB Device Management -->
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
-    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="System.Management" Version="11.0.0" />
     <!-- For SetupAPI USB enumeration -->
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
       <PrivateAssets>all</PrivateAssets>
