@@ -13,6 +13,8 @@ A unified desktop server suite combining:
 Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
 [![CI Build & Tests](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml)
+[![CodeQL SAST](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/codeql.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/codeql.yml)
+[![Gitleaks Secret Scan](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml)
 [![macOS Universal Build](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml)
 [![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.2)
