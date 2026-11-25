@@ -12,7 +12,13 @@ A unified desktop server suite combining:
 
 Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
+[![CI Build & Tests](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml)
+[![macOS Universal Build](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml/badge.svg)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml)
+[![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.2)
+[![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Server?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Server/commits/main)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
+[![SHA-256 Verified](https://img.shields.io/badge/Checksums-SHA--256%20Verified-14b8a6?style=flat-square)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -135,7 +141,7 @@ usbanywhere-ctl logs
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0 (GPLv3)**.
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)**. **GPLv3 copyleft prohibits closed-source proprietary commercial reuse** and requires preserving all copyright notices with prominent attribution to **oscarlosu-lab** (`https://github.com/oscarlosu-lab`) for any full or partial reuse.
 
 See [LICENSE](LICENSE) for full legal terms and conditions.
 
