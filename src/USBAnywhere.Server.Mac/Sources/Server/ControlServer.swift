@@ -22,6 +22,13 @@ public final class ControlServer {
 
     private init() {}
 
+    public static func isClientIPAllowed(_ ip: String) -> Bool {
+        let raw = ProcessInfo.processInfo.environment["USBANYWHERE_ALLOWED_IPS"] ?? ""
+        let allowed = raw.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+        if allowed.isEmpty { return true }
+        return ip == "127.0.0.1" || ip == "::1" || allowed.contains(ip)
+    }
+
     public func start(port: UInt16 = ControlServer.defaultControlPort) {
         guard !isRunning else { return }
 
@@ -83,6 +90,13 @@ public final class ControlServer {
                 continue
             }
 
+            let clientIP = String(cString: inet_ntoa(clientAddr.sin_addr))
+            guard Self.isClientIPAllowed(clientIP) else {
+                let denied = "{\"status\":\"DENIED\",\"message\":\"Client IP not allowed\"}\n"
+                _ = denied.withCString { send(clientFd, $0, strlen($0), 0) }
+                close(clientFd)
+                continue
+            }
             queue.async { [weak self] in
                 self?.handleClient(fd: clientFd)
             }

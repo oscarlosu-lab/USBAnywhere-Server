@@ -92,6 +92,11 @@ public final class USBIPServer {
             setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &rcvTimeout, socklen_t(MemoryLayout<timeval>.size))
             
             let clientIP = String(cString: inet_ntoa(clientAddr.sin_addr))
+            guard ControlServer.isClientIPAllowed(clientIP) else {
+                emitLog("🛡️ Rejected TCP 3240 connection from \(clientIP) (not in allowlist)")
+                close(clientFd)
+                continue
+            }
             emitLog("📡 Client connected from \(clientIP)")
             
             dispatchQueue.async {

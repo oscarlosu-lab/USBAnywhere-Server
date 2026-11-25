@@ -300,7 +300,7 @@ public class DiscoveryResponderService : IDisposable
     public void Stop()
     {
         _cts?.Cancel();
-        try { _tcpListener?.Stop(); } catch { }
+        try { _tcpListener?.Stop(); } catch (Exception ex) { LogService.Debug($"Discovery cleanup: {ex.Message}"); }
         _tcpListener = null;
         _udpClient?.Dispose();
         _udpClient = null;
