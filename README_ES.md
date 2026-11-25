@@ -12,7 +12,15 @@ Una suite de servidor de escritorio unificada que combina:
 
 Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com/oscarlosu-lab/USBAnywhere)**.
 
+[![CI Build & Tests](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/ci.yml)
+[![CodeQL SAST](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/codeql.yml)
+[![Gitleaks Secret Scan](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml)
+[![macOS Universal Build](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml)
+[![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.2)
+[![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Server?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Server/commits/main)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
+[![SHA-256 Verified](https://img.shields.io/badge/Checksums-SHA--256%20Verified-14b8a6?style=flat-square)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
 [![GitHub Stars](https://img.shields.io/github/stars/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=yellow)](https://github.com/oscarlosu-lab/USBAnywhere-Server/stargazers)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform Windows](https://img.shields.io/badge/platform-Windows%2010%2F11%20(x64)-lightgrey?style=flat-square&logo=windows)](https://github.com/oscarlosu-lab/USBAnywhere-Server)
@@ -20,6 +28,8 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 [![Website](https://img.shields.io/badge/Website-USBAnywhere-06B6D4?style=flat-square&logo=googlechrome&logoColor=white)](https://oscarlosu-lab.github.io/USBAnywhere/)
 [![Reddit Community](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Project-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/oscarlosu)
+
+> **¿Necesitas el Cliente en su lugar?** Instala **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** en el equipo Windows/Linux donde quieras *usar* el dispositivo USB remoto. (Los hosts Linux/Raspberry Pi usan `scripts/install-server.sh` desde ese repositorio; `USBAnywhere-Server` es solo para equipos anfitriones **Windows y macOS**, y `SnakeUSBIP` es una distribución hermana independiente con su propio canal de releases.)
 
 ---
 
@@ -133,7 +143,7 @@ usbanywhere-ctl logs
 
 ## 📄 Licencia
 
-Este proyecto está bajo licencia **GNU General Public License v3.0 (GPLv3)**.
+Este proyecto está bajo licencia **GNU General Public License v3.0 (GPLv3)**. **El copyleft de GPLv3 prohíbe la reutilización comercial propietaria de código cerrado** y exige conservar todos los avisos de copyright con atribución visible a **oscarlosu-lab** (`https://github.com/oscarlosu-lab`) ante cualquier reutilización total o parcial.
 
 Consulta el archivo [LICENSE](LICENSE) para conocer los términos completos.
 

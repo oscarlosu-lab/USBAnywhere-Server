@@ -8,16 +8,18 @@ on:
       - 'server-mac-*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-and-release-mac:
     name: Build Native macOS Universal Binary & Attach to Release
+    permissions:
+      contents: write
     runs-on: macos-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Compile Native Swift Server Daemon & GUI (Release)
         run: |
@@ -37,7 +39,7 @@ jobs:
           shasum -a 256 usbanywhere-server-mac "USBAnywhere-Server-macOS-${{ github.ref_name }}.tar.gz" "USBAnywhere-Server-macOS-${{ github.ref_name }}.zip" > SHA256SUMS-macOS.txt
 
       - name: Upload Artifacts to Workflow Run
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: USBAnywhere-Server-macOS-${{ github.ref_name }}
           path: dist/*
