@@ -37,7 +37,7 @@ jobs:
           shasum -a 256 usbanywhere-server-mac "USBAnywhere-Server-macOS-${{ github.ref_name }}.tar.gz" "USBAnywhere-Server-macOS-${{ github.ref_name }}.zip" > SHA256SUMS-macOS.txt
 
       - name: Upload Artifacts to Workflow Run
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: USBAnywhere-Server-macOS-${{ github.ref_name }}
           path: dist/*

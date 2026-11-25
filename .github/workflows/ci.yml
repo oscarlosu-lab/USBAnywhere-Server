@@ -81,7 +81,7 @@ jobs:
           shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.2.0.tar.gz > SHA256SUMS-macOS.txt
 
       - name: Upload macOS Server Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: USBAnywhere-Server-macOS-v3.2.0
           path: dist/*
