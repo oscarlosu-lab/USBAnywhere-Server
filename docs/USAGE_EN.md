@@ -37,7 +37,7 @@
 ### Steps
 
 1. Download the latest release from [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Run `USBAnywhere-Server_Setup_v3.2.0.exe` or extract `USBAnywhere-Server-v3.2.0-x64-Portable.zip`
+2. Run `USBAnywhere-Server_Setup_v3.3.2.exe` (or `v3.4.0-rc.1` RC) or extract `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
 
 ---
 

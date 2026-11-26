@@ -33,6 +33,14 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ---
 
+## 🧪 What's New in v3.4.0-rc.1 (Release Candidate)
+
+- 🔒 **Control Plane IP Allowlist & Token Auth (`usbanywhere-ctl`, `ControlServer.swift`)** — Optional `allowed_ips` whitelist and constant-time HMAC `control_token` authentication for TCP `3241` (`policy allow-ip|deny-ip|set-token|clear-token`).
+- 💾 **UAS Mass-Storage Detection** — Detects USB Attached SCSI (`uas`) drives alongside `usb-storage` and surfaces compatibility warnings before binding external SSDs.
+- 🛡️ **Windows Discovery Whitelist Hardening (`DiscoveryResponderService.cs`)** — Enforces the configured client IP allowlist on TCP `3241` inventory requests as well as discovery probes.
+
+---
+
 ## ✨ Features
 
 - 🖥️ **Windows & 🍎 macOS Server Support** — Share devices from either Windows or Mac across your LAN, Wi-Fi, or VPN.
@@ -117,6 +125,12 @@ sudo usbanywhere-ctl restart
 usbanywhere-ctl list
 sudo usbanywhere-ctl share 1-1
 sudo usbanywhere-ctl unshare 1-1
+
+# Control Plane security policy (TCP 3241) & DualSense SBC fix:
+sudo usbanywhere-ctl policy show
+sudo usbanywhere-ctl policy allow-ip 192.168.1.50
+sudo usbanywhere-ctl policy set-token <secret>
+sudo usbanywhere-ctl fix-dualsense enable
 
 # View live colorized daemon logs:
 usbanywhere-ctl logs

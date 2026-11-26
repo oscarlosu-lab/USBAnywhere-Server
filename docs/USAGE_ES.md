@@ -37,7 +37,7 @@
 ### Pasos
 
 1. Descarga la última versión desde [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.2.0.exe` o extrae el archivo `USBAnywhere-Server-v3.2.0-x64-Portable.zip`
+2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.3.2.exe` (o `v3.4.0-rc.1` RC) o extrae el archivo `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
 
 ---
 
@@ -74,7 +74,7 @@
 
 ## Solución de Problemas
 
-Consulta la [Guía de Solución de Problemas](TROUBLESHOOTING.md) o entra en **⚙️ Ajustes → 🛡️ Configure Firewall** para abrir el puerto TCP 3240 en el Firewall de Windows.
+Consulta la [Guía de Solución de Problemas](TROUBLESHOOTING_ES.md) o entra en **⚙️ Ajustes → 🛡️ Configure Firewall** para abrir el puerto TCP 3240 en el Firewall de Windows.
 
 ---
 

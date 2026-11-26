@@ -33,6 +33,14 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 
 ---
 
+## 🧪 Novedades en v3.4.0-rc.1 (Release Candidate)
+
+- 🔒 **Lista Blanca de IPs y Auth por Token en API de Control (`usbanywhere-ctl`, `ControlServer.swift`)** — Filtrado opcional `allowed_ips` y autenticación `control_token` por HMAC en tiempo constante sobre TCP `3241` (`policy allow-ip|deny-ip|set-token|clear-token`).
+- 💾 **Detección de Almacenamiento UAS** — Detecta unidades USB Attached SCSI (`uas`) junto a `usb-storage` y muestra avisos de compatibilidad antes de compartir SSDs externos.
+- 🛡️ **Endurecimiento de Lista Blanca en Windows (`DiscoveryResponderService.cs`)** — Aplica la lista blanca de IPs configurada también sobre las consultas de inventario en TCP `3241`.
+
+---
+
 ## ✨ Características Principales
 
 - 🖥️ **Soporte de Servidor Windows y 🍎 macOS** — Comparte periféricos desde tu PC Windows o tu Mac hacia cualquier cliente de red local, Wi-Fi o VPN.
@@ -117,6 +125,12 @@ sudo usbanywhere-ctl restart
 usbanywhere-ctl list
 sudo usbanywhere-ctl share 1-1
 sudo usbanywhere-ctl unshare 1-1
+
+# Política de seguridad (TCP 3241) y parche DualSense SBC:
+sudo usbanywhere-ctl policy show
+sudo usbanywhere-ctl policy allow-ip 192.168.1.50
+sudo usbanywhere-ctl policy set-token <secreto>
+sudo usbanywhere-ctl fix-dualsense enable
 
 # Monitorización de logs en tiempo real:
 usbanywhere-ctl logs

@@ -60,6 +60,39 @@ El Control de Integridad Obligatorio de Windows (MIC) o restricciones NTFS hered
 
 ---
 
+### 5. TCP `3241` devuelve `DENIED` (Lista blanca de IPs o Control Token)
+
+**Síntomas**:
+Los clientes remotos reciben `{"status": "DENIED"}` o un listado vacío al consultar TCP `3241`.
+
+**Soluciones**:
+1. En Linux/macOS, revisa la política activa:
+   ```bash
+   sudo usbanywhere-ctl policy show
+   ```
+2. Añade la IP del cliente (`sudo usbanywhere-ctl policy allow-ip <ip-cliente>`) o limpia el token (`sudo usbanywhere-ctl policy clear-token`).
+3. En Windows Server, comprueba la lista blanca de IPs en **⚙️ Ajustes** (`DiscoveryResponderService`).
+
+---
+
+### 6. Un disco SSD externo falla al conectarse (driver `uas`)
+
+**Síntomas**:
+Unidades SSD externas asociadas en Linux al driver `uas` (USB Attached SCSI) fallan al enumerarse en remoto.
+
+**Soluciones**:
+- `usbanywhere-ctl` y `USBIPServer.swift` detectan unidades `uas` y muestran aviso previo. Usar modo `usb-storage` estándar (`usb-storage.quirks=<vid>:<pid>:u`) mejora la compatibilidad por USB/IP.
+
+---
+
+### 7. Dispositivo Linux bloqueado tras desconexión (`SDEV_ST_ERROR`)
+
+**Soluciones**:
+1. Ejecuta `sudo usbanywhere-ctl doctor` para comprobar módulos (`usbip_core`, `usbip_host`) y estado del bus.
+2. Reinicia el demonio (`sudo usbanywhere-ctl restart`) o aplica los parches `patches/rpi-dwc-usbip-host/` en Raspberry Pi / SBCs ARM.
+
+---
+
 ## Soporte y Comunidad
 
 - [Incidencias en GitHub (Issues)](https://github.com/oscarlosu-lab/USBAnywhere-Server/issues)
