@@ -259,7 +259,7 @@ public class DiscoveryResponderService : IDisposable
                 else if (cmd == "STATUS")
                 {
                     var devs = _usbipdService != null ? await _usbipdService.GetDevicesAsync() : new();
-                    var version = typeof(DiscoveryResponderService).Assembly.GetName().Version?.ToString(3) ?? "3.3.2";
+                    var version = typeof(DiscoveryResponderService).Assembly.GetName().Version?.ToString(3) ?? "3.4.0";
                     await WriteJsonAsync(stream, new
                     {
                         status = "OK",

@@ -1,5 +1,15 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.4.0-rc.1] - 2026-11-26 (Release Candidate)
+
+### Added
+- **Control Plane IP Allowlist & Token Auth (`usbanywhere-ctl`, `ControlServer.swift`)**:
+  - Added optional `allowed_ips` whitelist and constant-time HMAC `control_token` authentication for TCP `3241` control commands (`policy allow-ip|deny-ip|set-token|clear-token`).
+- **UAS Mass-Storage Detection (`usbanywhere-ctl`, `USBIPServer.swift`)**:
+  - Detects USB Attached SCSI (`uas`) devices alongside `usb-storage` and surfaces clear compatibility notices before binding external SSDs.
+- **Windows Server Discovery Whitelist Hardening (`DiscoveryResponderService.cs`)**:
+  - Enforces client IP whitelist checks before serving device inventory over TCP `3241`.
+
 ## [3.3.2] - 2026-11-15
 
 ### Fixed

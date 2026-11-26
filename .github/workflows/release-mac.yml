@@ -49,4 +49,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           RELEASE_TAG="${{ github.ref_name }}"
-          gh release upload "${RELEASE_TAG}" dist/* --clobber || gh release create "${RELEASE_TAG}" dist/* --title "USBAnywhere Server ${RELEASE_TAG}" --notes "Official macOS release binary (Universal Apple Silicon & Intel)." || true
+          PRE_FLAG=""
+          if [[ "${RELEASE_TAG}" == *-* ]]; then
+            PRE_FLAG="--prerelease"
+          fi
+          gh release upload "${RELEASE_TAG}" dist/* --clobber || gh release create "${RELEASE_TAG}" dist/* ${PRE_FLAG} --title "USBAnywhere Server ${RELEASE_TAG}" --notes "Official macOS release binary (Universal Apple Silicon & Intel)." || true

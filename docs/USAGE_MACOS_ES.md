@@ -110,6 +110,7 @@ USBAnywhere Server para macOS integra tanto un CLI interactivo / LaunchDaemon en
 - **Motor Auto-Bind**: Re-exportación automática de dispositivos USB memorizados por su firma de hardware cada vez que se conectan de nuevo al Mac.
 - **Menú en Barra de Estado (`NSStatusItem`)**: Acceso rápido desde la barra superior de macOS para monitorizar dispositivos compartidos, copiar la IP y gestionar el servicio.
 - **Auto-Descubrimiento Multi-Nivel**: Respondedor UDP 3241 integrado y publicación Bonjour mDNS (`_usbanywhere._tcp`) para detección instantánea desde clientes Windows y Android.
+- **Seguridad API de Control y Aviso UAS (`v3.4.0-rc.1`)**: `ControlServer.swift` soporta lista blanca de IPs y token opcional en TCP `3241`, y `USBIPServer.swift` detecta dispositivos de almacenamiento UAS.
 
 ---
 

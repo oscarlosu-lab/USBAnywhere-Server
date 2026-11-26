@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.3.2** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
+**v3.3.2** (Stable) · **[v3.4.0-rc.1](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.4.0-rc.1)** (Release Candidate) | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
 
 **Share local USB peripherals from Windows PCs and Apple Macs over your network — Zero hassle.**
 
@@ -29,7 +29,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 [![Reddit Community](https://img.shields.io/badge/Reddit-r%2FUsbAnywhere-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://www.reddit.com/r/UsbAnywhere/)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Project-FF5E5B?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/oscarlosu)
 
-> **Need the Client instead?** Install **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** on the Windows/Linux machine where you want to *use* the remote USB device. (Linux/Raspberry Pi hosts use `scripts/install-server.sh` from that repo; `USBAnywhere-Server` is only for **Windows & macOS** host machines, and `SnakeUSBIP` is a separate sibling distribution with its own release channel.)
+> **Need the Client instead?** Install **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** on the Windows/Linux machine where you want to *use* the remote USB device. (Linux/Raspberry Pi hosts use `scripts/install-server.sh` from that repo; `USBAnywhere-Server` is only for **Windows & macOS** host machines, and `SnakeUSBIP` is the staging/testing branch currently migrating into **USBAnywhere**, the final production product.)
 
 ---
 
