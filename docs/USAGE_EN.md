@@ -37,7 +37,7 @@
 ### Steps
 
 1. Download the latest release from [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Run `USBAnywhere-Server_Setup_v3.3.2.exe` (or `v3.4.0-rc.1` RC) or extract `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
+2. Run `USBAnywhere-Server_Setup_v3.3.2.exe` (or `v3.4.0` RC) or extract `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
 
 ---
 
@@ -84,7 +84,7 @@ See [Troubleshooting Guide](TROUBLESHOOTING.md) or click **⚙️ Settings → �
 2. Click **🗑️ Uninstall Driver** if you wish to remove the `usbipd-win` system driver
 3. Use Windows Installed Apps to uninstall **USBAnywhere Server** (or delete the folder if using Portable mode)
 
-## Security & Compatibility (`v3.4.0-rc.1`)
+## Security & Compatibility (`v3.4.0`)
 
 - **IP Whitelist Hardening**: When an IP whitelist is configured, `DiscoveryResponderService` enforces the allowlist on TCP `3241` inventory requests as well as discovery probes.
 - **Linux/macOS Control API & UAS Notice**: `usbanywhere-ctl` supports optional `allowed_ips` and constant-time HMAC `control_token` authentication (`policy allow-ip|deny-ip|set-token|clear-token`) and warns before binding `uas` mass-storage drives.

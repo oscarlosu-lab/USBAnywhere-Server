@@ -37,7 +37,7 @@
 ### Pasos
 
 1. Descarga la última versión desde [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.3.2.exe` (o `v3.4.0-rc.1` RC) o extrae el archivo `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
+2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.3.2.exe` (o `v3.4.0` RC) o extrae el archivo `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
 
 ---
 
@@ -84,7 +84,7 @@ Consulta la [Guía de Solución de Problemas](TROUBLESHOOTING_ES.md) o entra en 
 2. Haz clic en **🗑️ Desinstalar Driver** si deseas eliminar también el controlador `usbipd-win`
 3. Desinstala **USBAnywhere Server** desde Configuración de Windows (o borra la carpeta si usas la versión Portable).
 
-## Seguridad y Compatibilidad (`v3.4.0-rc.1`)
+## Seguridad y Compatibilidad (`v3.4.0`)
 
 - **Lista Blanca de IPs**: Cuando está activa, `DiscoveryResponderService` valida la IP cliente también en las consultas de inventario por TCP `3241`.
 - **API de Control Linux/macOS y Aviso UAS**: `usbanywhere-ctl` añade `allowed_ips` opcional y autenticación por `control_token` HMAC (`policy allow-ip|deny-ip|set-token|clear-token`), además de detectar unidades externas `uas`.

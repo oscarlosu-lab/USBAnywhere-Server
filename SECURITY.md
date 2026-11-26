@@ -4,7 +4,7 @@
 
 | Version | Supported | Status |
 | --- | --- | --- |
-| 3.4.0-rc.1 | Yes | Release Candidate (Pre-release) |
+| 3.4.0 | Yes | Latest Stable Release |
 | 3.3.x | Yes | Active Stable (Current: v3.3.2) |
 | < 3.3 | No | Unsupported |
 

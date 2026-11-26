@@ -1,6 +1,6 @@
 # CHANGELOG - USBAnywhere Server
 
-## [3.4.0-rc.1] - 2026-11-26 (Release Candidate)
+## [3.4.0] - 2026-11-26
 
 ### Added
 - **Control Plane IP Allowlist & Token Auth (`usbanywhere-ctl`, `ControlServer.swift`)**:
@@ -9,6 +9,8 @@
   - Detects USB Attached SCSI (`uas`) devices alongside `usb-storage` and surfaces clear compatibility notices before binding external SSDs.
 - **Windows Server Discovery Whitelist Hardening (`DiscoveryResponderService.cs`)**:
   - Enforces client IP whitelist checks before serving device inventory over TCP `3241`.
+- **Synced `usbanywhere-ctl` Linux Control Suite (PR #21)**:
+  - Includes interactive `sudo` re-exec, expanded dashboard modes, and optional `client-guard` sleep inhibitor.
 
 ## [3.3.2] - 2026-11-15
 

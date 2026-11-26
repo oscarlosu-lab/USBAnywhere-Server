@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.3.2** (Stable) · **[v3.4.0-rc.1](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.4.0-rc.1)** (Release Candidate) | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
+**v3.4.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
 
 **Share local USB peripherals from Windows PCs and Apple Macs over your network — Zero hassle.**
 
@@ -33,7 +33,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ---
 
-## 🧪 What's New in v3.4.0-rc.1 (Release Candidate)
+## 🆕 What's New in v3.4.0
 
 - 🔒 **Control Plane IP Allowlist & Token Auth (`usbanywhere-ctl`, `ControlServer.swift`)** — Optional `allowed_ips` whitelist and constant-time HMAC `control_token` authentication for TCP `3241` (`policy allow-ip|deny-ip|set-token|clear-token`).
 - 💾 **UAS Mass-Storage Detection** — Detects USB Attached SCSI (`uas`) drives alongside `usb-storage` and surfaces compatibility warnings before binding external SSDs.
