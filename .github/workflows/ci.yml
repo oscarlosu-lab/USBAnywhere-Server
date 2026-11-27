@@ -30,7 +30,7 @@ jobs:
       - name: Build Release
         run: dotnet build USBAnywhere-Server.sln -c Release --no-restore
 
-      - name: Run Unit Tests (54 xUnit Tests)
+      - name: Run Unit Tests (67 xUnit Tests)
         run: dotnet test USBAnywhere-Server.sln -c Release --no-build --verbosity normal
 
   build-and-test-macos:
@@ -77,13 +77,13 @@ jobs:
           cp .build/release/usbanywhere-server-mac ../../dist/
           cd ../../dist
           chmod +x usbanywhere-server-mac
-          tar -czvf USBAnywhere-Server-macOS-v3.2.0.tar.gz usbanywhere-server-mac
-          shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.2.0.tar.gz > SHA256SUMS-macOS.txt
+          tar -czvf USBAnywhere-Server-macOS-v3.5.0.tar.gz usbanywhere-server-mac
+          shasum -a 256 usbanywhere-server-mac USBAnywhere-Server-macOS-v3.5.0.tar.gz > SHA256SUMS-macOS.txt
 
       - name: Upload macOS Server Artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: USBAnywhere-Server-macOS-v3.2.0
+          name: USBAnywhere-Server-macOS-v3.5.0
           path: dist/*
 
   build-and-test-linux:

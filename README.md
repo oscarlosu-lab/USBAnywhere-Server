@@ -17,7 +17,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 [![Gitleaks Secret Scan](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/security.yml)
 [![macOS Universal Build](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml/badge.svg?branch=main)](https://github.com/oscarlosu-lab/USBAnywhere-Server/actions/workflows/release-mac.yml)
 [![Latest Release](https://img.shields.io/github/v/release/oscarlosu-lab/USBAnywhere-Server?style=flat-square&logo=github&color=0ea5e9)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.2)
+[![GitHub Downloads](https://img.shields.io/github/downloads/oscarlosu-lab/USBAnywhere-Downloads/total?style=flat-square&logo=github&color=blue)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.5.0)
 [![Last Commit](https://img.shields.io/github/last-commit/oscarlosu-lab/USBAnywhere-Server?style=flat-square&color=10b981)](https://github.com/oscarlosu-lab/USBAnywhere-Server/commits/main)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-10b981?style=flat-square&logo=shield&logoColor=white)](SECURITY.md)
 [![SHA-256 Verified](https://img.shields.io/badge/Checksums-SHA--256%20Verified-14b8a6?style=flat-square)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
@@ -63,7 +63,7 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 
 ## 🚀 Quick Start — Windows Server
 
-1. Download `USBAnywhere-Server_Setup_v3.3.2.exe` or the portable ZIP from [USBAnywhere Server Releases (v3.3.2)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.3.2).
+1. Download `USBAnywhere-Server_Setup_v3.5.0.exe` or the portable ZIP from [USBAnywhere Server Releases (v3.5.0)](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/tag/v3.5.0).
 2. Run `USBAnywhere-Server.exe` as Administrator.
 3. Click **📤 Share** on any device (or **⚡ Share All**).
 4. Click the green **IP badge** in the header to copy your server IP address.
@@ -88,7 +88,7 @@ See [macOS User Guide (English)](docs/USAGE_MACOS_EN.md) / [Guía de macOS (Espa
 
 ---
 
-## 🐧 Quick Start — Linux Server & Client (`usbanywhere-ctl` v3.3.2)
+## 🐧 Quick Start — Linux Server & Client (`usbanywhere-ctl` v3.5.0)
 
 On your Linux machine or Raspberry Pi, open **Terminal** and run:
 

@@ -14,7 +14,7 @@
 #endif
 
 [Setup]
-AppId={{B2C3D4E5-F6A7-8901-BCDE-F12345678901}
+AppId={{6A1F8C3D-9B42-4E7A-8C5F-2D9E1A4B7C83}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -79,3 +79,47 @@ Type: filesandordirs; Name: "{app}\logs"
 Type: filesandordirs; Name: "{app}\data"
 Type: files; Name: "{app}\settings.json"
 Type: filesandordirs; Name: "{userappdata}\USBAnywhere-Server\logs"
+
+[Code]
+procedure CleanupLegacyServerKey(RootKey: Integer);
+var
+  LegacyKey, DisplayName, OldDir, OldExe, CurDir: String;
+  ResultCode: Integer;
+begin
+  LegacyKey := 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B2C3D4E5-F6A7-8901-BCDE-F12345678901}_is1';
+  if RegQueryStringValue(RootKey, LegacyKey, 'DisplayName', DisplayName) then
+  begin
+    if CompareText(Trim(DisplayName), 'USBAnywhere Server') = 0 then
+    begin
+      if RegQueryStringValue(RootKey, LegacyKey, 'InstallLocation', OldDir) then
+      begin
+        OldDir := RemoveBackslashUnlessRoot(Trim(OldDir));
+        CurDir := RemoveBackslashUnlessRoot(ExpandConstant('{app}'));
+        if (OldDir <> '') and (CompareText(OldDir, CurDir) <> 0) then
+        begin
+          OldExe := AddBackslash(OldDir) + 'USBAnywhere-Server.exe';
+          if FileExists(OldExe) then
+          begin
+            Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM USBAnywhere-Server.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+            DeleteFile(OldExe);
+          end;
+        end;
+      end;
+      RegDeleteKeyIncludingSubkeys(RootKey, LegacyKey);
+    end;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  RunVal: String;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    CleanupLegacyServerKey(HKLM64);
+    CleanupLegacyServerKey(HKLM32);
+    CleanupLegacyServerKey(HKCU);
+    if RegQueryStringValue(HKCU, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run', '{#MyAppName}', RunVal) then
+      RegWriteStringValue(HKCU, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Run', '{#MyAppName}', '"' + ExpandConstant('{app}\{#MyAppExeName}') + '" --minimized');
+  end;
+end;

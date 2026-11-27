@@ -19,6 +19,7 @@ public sealed class TlsTunnelService : IDisposable
     private readonly int _targetPort;
     private readonly string? _bindAddressOverride;
     private readonly X509Certificate2 _certificate;
+    private readonly SemaphoreSlim _connLimit = new(64, 64);
     private TcpListener? _listener;
     private CancellationTokenSource? _cts;
     private bool _disposed;
@@ -104,11 +105,17 @@ public sealed class TlsTunnelService : IDisposable
 
     private async Task HandleClientAsync(TcpClient client, CancellationToken ct)
     {
+        bool acquired = false;
         using (client)
         {
             try
             {
+                acquired = await _connLimit.WaitAsync(TimeSpan.FromSeconds(2), ct);
+                if (!acquired) return;
+
                 client.NoDelay = true;
+                using var hsCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                hsCts.CancelAfter(10000);
                 using var ssl = new SslStream(client.GetStream(), leaveInnerStreamOpen: false);
                 await ssl.AuthenticateAsServerAsync(new SslServerAuthenticationOptions
                 {
@@ -116,20 +123,27 @@ public sealed class TlsTunnelService : IDisposable
                     ClientCertificateRequired = false,
                     EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                     CertificateRevocationCheckMode = X509RevocationMode.NoCheck
-                }, ct);
+                }, hsCts.Token);
 
                 using var upstream = new TcpClient();
                 upstream.NoDelay = true;
-                await upstream.ConnectAsync(IPAddress.Loopback, _targetPort, ct);
+                await upstream.ConnectAsync(IPAddress.Loopback, _targetPort, hsCts.Token);
                 using var upStream = upstream.GetStream();
 
-                var t1 = ssl.CopyToAsync(upStream, 65536, ct);
-                var t2 = upStream.CopyToAsync(ssl, 65536, ct);
+                using var pumpCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                var t1 = ssl.CopyToAsync(upStream, 65536, pumpCts.Token);
+                var t2 = upStream.CopyToAsync(ssl, 65536, pumpCts.Token);
                 await Task.WhenAny(t1, t2);
+                pumpCts.Cancel();
+                try { await Task.WhenAll(t1, t2); } catch { }
             }
             catch (Exception ex)
             {
                 LogService.Debug($"TLS tunnel session closed: {ex.Message}");
+            }
+            finally
+            {
+                if (acquired) _connLimit.Release();
             }
         }
     }

@@ -30,6 +30,7 @@ public class DiscoveryResponderService : IDisposable
     private readonly PairingService _pairingService;
     private readonly Func<string?>? _tlsFingerprintProvider;
     private readonly SemaphoreSlim _clientConcurrency = new(8, 8);
+    private readonly object _pairStateLock = new();
     private UdpClient? _udpClient;
     private TcpListener? _tcpListener;
     private CancellationTokenSource? _cts;
@@ -218,23 +219,30 @@ public class DiscoveryResponderService : IDisposable
                     if (_pairingService.TryRedeem(preParts[1]))
                     {
                         var remoteIp = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString();
-                        if (!string.IsNullOrWhiteSpace(remoteIp) &&
-                            SettingsService.Current.WhitelistEnabled &&
-                            !SettingsService.Current.WhitelistedIPs.Contains(remoteIp, StringComparer.OrdinalIgnoreCase))
+                        string controlToken;
+                        lock (_pairStateLock)
                         {
-                            SettingsService.Current.WhitelistedIPs.Add(remoteIp);
+                            if (!string.IsNullOrWhiteSpace(remoteIp) &&
+                                SettingsService.Current.WhitelistEnabled &&
+                                !SettingsService.Current.WhitelistedIPs.Contains(remoteIp, StringComparer.OrdinalIgnoreCase))
+                            {
+                                SettingsService.Current.WhitelistedIPs.Add(remoteIp);
+                            }
+                            if (string.IsNullOrWhiteSpace(SettingsService.Current.ControlToken))
+                            {
+                                SettingsService.Current.ControlToken = PairingService.GenerateControlToken();
+                            }
+                            controlToken = SettingsService.Current.ControlToken;
+                            SettingsService.Save();
                         }
-                        if (string.IsNullOrWhiteSpace(SettingsService.Current.ControlToken))
-                        {
-                            SettingsService.Current.ControlToken = PairingService.GenerateControlToken();
-                        }
-                        SettingsService.Save();
                         var fp = _tlsFingerprintProvider?.Invoke() ?? "";
                         await WriteJsonAsync(stream, new
                         {
                             status = "OK",
                             server = Environment.MachineName,
-                            token = SettingsService.Current.ControlToken,
+                            server_name = Environment.MachineName,
+                            token = controlToken,
+                            control_token = controlToken,
                             usbip_port = 3240,
                             tls_port = SettingsService.Current.TlsPort,
                             tls_fingerprint = fp

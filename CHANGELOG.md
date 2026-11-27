@@ -12,6 +12,12 @@
 - **Synced Linux Control Suite & MCP Server (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**:
   - Added pairing (`pair --json`), TLS tunnel (`tls-tunnel`), automatic USB autosuspend protection, `bind_address` systemd drop-ins, `--reset`, `--json` diagnostics, and 6-tool stdio MCP server.
 
+### Fixed
+- **Pre-Release E2E & Stress Hardening (`DiscoveryResponderService`, `TlsTunnelService`, `usbanywhere-ctl`, `usbanywhere-mcp.py`, `USBAnywhere-Server.iss`)**:
+  - Added lock-synchronized `PAIR` whitelist/token persistence, `"token"`/`"control_token"`/`"server_name"` protocol aliases, `SemaphoreSlim(64, 64)` TLS concurrency bounds, and 10s TLS handshake timeouts.
+  - Restricted remote `PAIR_CREATE` on Linux TCP `3241` to loopback unless `control_token` is set, persisted pairing state (`0o600`), raised `listen(64)`, added non-blocking `logs` defaults, and isolated MCP `stdout`.
+  - Assigned an independent `AppId` in `USBAnywhere-Server.iss` with safe legacy uninstall key cleanup that preserves user data and coexisting `SnakeUSBIP` installations.
+
 ## [3.4.0] - 2026-11-26
 
 ### Added
