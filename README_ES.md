@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** [English](README.md) | **Español**
 
-**v3.4.0** | [🌍 Sitio Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y Descargas](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 Cliente USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [📖 Manual Windows](docs/USAGE_ES.md) | [🍎 Manual macOS](docs/USAGE_MACOS_ES.md) | [🛠️ Solución de Problemas](docs/TROUBLESHOOTING_ES.md)
+**v3.5.0** | [🌍 Sitio Web Oficial](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases y Descargas](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 Cliente USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Comunidad Reddit](https://www.reddit.com/r/UsbAnywhere/) | [📖 Manual Windows](docs/USAGE_ES.md) | [🍎 Manual macOS](docs/USAGE_MACOS_ES.md) | [🛠️ Solución de Problemas](docs/TROUBLESHOOTING_ES.md)
 
 **Comparte periféricos USB locales desde PCs Windows y Apple Macs a través de tu red doméstica o VPN.**
 
@@ -32,6 +32,12 @@ Parte del **[Ecosistema de Código Abierto USBAnywhere v3.0+](https://github.com
 > **¿Necesitas el Cliente en su lugar?** Instala **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** en el equipo Windows/Linux donde quieras *usar* el dispositivo USB remoto. (Los hosts Linux/Raspberry Pi usan `scripts/install-server.sh` desde ese repositorio; `USBAnywhere-Server` es solo para equipos anfitriones **Windows y macOS**, y `SnakeUSBIP` es la rama de pruebas en migración hacia **USBAnywhere**, el producto final recomendado.)
 
 ---
+
+## 🆕 Novedades en v3.5.0
+- 🔐 **Emparejamiento 6 dígitos y Túnel TLS 1.3 Opcional (`PairingService`, `TlsTunnelService`)** - Códigos de un solo uso (TTL 5 min), filtro `BindAddress` en TCP/UDP/Firewall (`3240, 3241, 3243`), fingerprint TLS SHA-256 y columna `Rev` (`[Rev:XXXX]`).
+- 🪟 **Sincronización tras Suspensión y Aislamiento Multi-Sesión (`PowerModes.Resume`, `SessionIsolationService`)**.
+- 🍎 **macOS `IOUSBHost` Real y Micrófono Virtual UAC1 (`IOUSBHostSession`, `VirtualMacMicDevice`)** - Pipes Bulk/Interrupt reales, captura `AVAudioEngine` 48 kHz y comprobador de releases SHA-256.
+- 🐧 **Control Suite Linux Sincronizado y Servidor MCP (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**.
 
 ## 🆕 Novedades en v3.4.0
 

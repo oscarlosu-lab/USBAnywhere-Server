@@ -50,6 +50,9 @@ public partial class SettingsWindow : Window
 
         secNetwork.Text = _localization.GetText("sec_network", _currentLanguage);
         btnFirewall.Content = _localization.GetText("btn_firewall", _currentLanguage);
+        lblBindAddress.Text = _localization.GetText("lbl_bind_address", _currentLanguage);
+        txtBindAddress.ToolTip = _localization.GetText("hint_bind_address", _currentLanguage);
+        chkTlsTunnel.Content = _localization.GetText("chk_tls_tunnel", _currentLanguage);
 
         secAdvanced.Text = _localization.GetText("sec_advanced", _currentLanguage);
         lblRefreshInterval.Text = _localization.GetText("lbl_refresh_interval", _currentLanguage);
@@ -80,6 +83,8 @@ public partial class SettingsWindow : Window
         txtWhitelistedIPs.Text = string.Join(", ", settings.WhitelistedIPs);
 
         UpdateFirewallStatus(FirewallService.IsRuleConfigured() || settings.FirewallConfigured);
+        txtBindAddress.Text = settings.BindAddress ?? "";
+        chkTlsTunnel.IsChecked = settings.TlsTunnelEnabled;
 
         txtRefreshInterval.Text = settings.RefreshIntervalSeconds.ToString();
     }
@@ -103,6 +108,19 @@ public partial class SettingsWindow : Window
             .Where(ip => !string.IsNullOrEmpty(ip) && System.Text.RegularExpressions.Regex.IsMatch(ip, @"^[0-9a-fA-F:./]+$"))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+
+        var candidateBind = (txtBindAddress.Text ?? "").Trim();
+        if (!SecurityHelper.IsValidBindAddress(candidateBind))
+        {
+            System.Windows.MessageBox.Show(
+                _localization.GetText("err_invalid_bind_address", _currentLanguage),
+                _localization.GetText("settings_title", _currentLanguage),
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+        settings.BindAddress = candidateBind is "0.0.0.0" or "any" or "*" ? "" : candidateBind;
+        settings.TlsTunnelEnabled = chkTlsTunnel.IsChecked ?? false;
 
         if (int.TryParse(txtRefreshInterval.Text, out int interval) && interval >= 1 && interval <= 60)
         {

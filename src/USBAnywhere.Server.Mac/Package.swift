@@ -22,6 +22,8 @@ let package = Package(
             path: "Sources",
             linkerSettings: [
                 .linkedFramework("IOKit"),
+                .linkedFramework("IOUSBHost"),
+                .linkedFramework("AVFoundation"),
                 .linkedFramework("CoreFoundation"),
                 .linkedFramework("Network"),
                 .linkedFramework("AppKit"),

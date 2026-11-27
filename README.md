@@ -2,7 +2,7 @@
 
 🌐 **Language / Idioma:** **English** | [Español](README_ES.md)
 
-**v3.4.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
+**v3.5.0** | [🌍 Official Website](https://oscarlosu-lab.github.io/USBAnywhere/) | [📦 Releases & Downloads](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest) | [🔗 USBAnywhere Client](https://github.com/oscarlosu-lab/USBAnywhere) | [📱 USBAnywhere Android](https://github.com/oscarlosu-lab/USBAnywhere-Android) | [💬 Reddit Community](https://www.reddit.com/r/UsbAnywhere/) | [📖 Windows Manual](docs/USAGE_EN.md) | [🍎 macOS Manual](docs/USAGE_MACOS_EN.md) | [🛠️ Troubleshooting](docs/TROUBLESHOOTING.md)
 
 **Share local USB peripherals from Windows PCs and Apple Macs over your network — Zero hassle.**
 
@@ -32,6 +32,12 @@ Part of the **[USBAnywhere v3.0+ Open-Source Ecosystem](https://github.com/oscar
 > **Need the Client instead?** Install **[USBAnywhere](https://github.com/oscarlosu-lab/USBAnywhere)** on the Windows/Linux machine where you want to *use* the remote USB device. (Linux/Raspberry Pi hosts use `scripts/install-server.sh` from that repo; `USBAnywhere-Server` is only for **Windows & macOS** host machines, and `SnakeUSBIP` is the staging/testing branch currently migrating into **USBAnywhere**, the final production product.)
 
 ---
+
+## 🆕 What's New in v3.5.0
+- 🔐 **Zero-Config 6-Digit Pairing & Optional TLS 1.3 Tunnel (`PairingService`, `TlsTunnelService`)** - One-time 6-digit pairing codes, `BindAddress` firewall/listener scoping (`3240, 3241, 3243`), TLS SHA-256 fingerprint advertisement, and `[Rev:XXXX]` column in Server UI.
+- 🪟 **Wake-from-Sleep Sync & Multi-Session Isolation** - Auto-refreshes devices on `PowerModes.Resume` and enforces WTS session isolation.
+- 🍎 **macOS `IOUSBHost` Real Transport & Virtual Mac Mic (`IOUSBHostSession`, `VirtualMacMicDevice`)** - Real `IOUSBHostInterface` pipe transfers, `AVAudioEngine` 48 kHz mono UAC1 capture, and SHA-256 GitHub Releases updater.
+- 🐧 **Synced Linux Control Suite & 6-Tool MCP Server (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**.
 
 ## 🆕 What's New in v3.4.0
 

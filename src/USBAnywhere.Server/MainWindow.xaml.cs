@@ -33,6 +33,7 @@ public partial class MainWindow : Window
     private readonly DriverInstaller _driverInstaller;
     private readonly UpdateService _updateService;
     private readonly DiscoveryResponderService _discoveryService;
+    private readonly TlsTunnelService _tlsTunnelService;
     private readonly LocalizationService _localization;
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<LocalUsbDevice> _deviceCollection = new();
@@ -58,7 +59,15 @@ public partial class MainWindow : Window
         _usbipdService = new UsbipdService();
         _driverInstaller = new DriverInstaller();
         _updateService = new UpdateService();
-        _discoveryService = new DiscoveryResponderService(_usbipdService, () => Dispatcher.InvokeAsync(RefreshDeviceListAsync));
+        _tlsTunnelService = new TlsTunnelService(SettingsService.Current.TlsPort, 3240);
+        if (SettingsService.Current.TlsTunnelEnabled)
+        {
+            _tlsTunnelService.Start();
+        }
+        _discoveryService = new DiscoveryResponderService(
+            _usbipdService,
+            () => Dispatcher.InvokeAsync(RefreshDeviceListAsync),
+            tlsFingerprintProvider: () => _tlsTunnelService.IsRunning ? _tlsTunnelService.CertificateFingerprintSha256 : null);
         _discoveryService.Start();
         _localization = new LocalizationService();
 
@@ -81,7 +90,24 @@ public partial class MainWindow : Window
         UpdateUITexts();
         ThemeService.ApplyTheme(_currentTheme);
 
+        Microsoft.Win32.SystemEvents.PowerModeChanged += OnPowerModeChanged;
         Loaded += MainWindow_Loaded;
+    }
+
+    private async void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
+    {
+        if (e.Mode != Microsoft.Win32.PowerModes.Resume) return;
+        try
+        {
+            _usbipdService.InvalidateWmiCache();
+            AddLocalizedLog("log_system_resumed");
+            await Task.Delay(1200);
+            await Dispatcher.InvokeAsync(RefreshDeviceListAsync);
+        }
+        catch (Exception ex)
+        {
+            LogService.Debug($"PowerMode resume refresh failed: {ex.Message}");
+        }
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -583,6 +609,7 @@ public partial class MainWindow : Window
 
     private void BtnSettings_Click(object sender, RoutedEventArgs e)
     {
+        var previousBind = SettingsService.Current.BindAddress;
         var settingsWindow = new Views.SettingsWindow
         {
             Owner = this
@@ -591,6 +618,18 @@ public partial class MainWindow : Window
         {
             AddLocalizedLog("log_settings_saved");
             ApplySettings();
+            if (!string.Equals(previousBind, SettingsService.Current.BindAddress, StringComparison.OrdinalIgnoreCase))
+            {
+                _discoveryService.Restart();
+            }
+            if (SettingsService.Current.TlsTunnelEnabled && !_tlsTunnelService.IsRunning)
+            {
+                _tlsTunnelService.Start();
+            }
+            else if (!SettingsService.Current.TlsTunnelEnabled && _tlsTunnelService.IsRunning)
+            {
+                _tlsTunnelService.Stop();
+            }
         }
     }
 
@@ -949,9 +988,11 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        Microsoft.Win32.SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         _refreshTimer.Stop();
         _usbipdService.Dispose();
         _discoveryService.Dispose();
+        _tlsTunnelService.Dispose();
 
         if (_notifyIcon != null)
         {

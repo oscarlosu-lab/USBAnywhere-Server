@@ -21,6 +21,20 @@ public class LocalUsbDevice : INotifyPropertyChanged
     private bool _isExported;
     private bool _isNotShared = true;
     private string _currentLanguage = "en";
+    private string _revision = "";
+
+    public string Revision
+    {
+        get => _revision;
+        set
+        {
+            if (_revision != value)
+            {
+                _revision = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

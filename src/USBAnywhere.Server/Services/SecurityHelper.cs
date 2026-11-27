@@ -4,6 +4,7 @@
  * https://github.com/oscarlosu-lab/USBAnywhere-Server
  */
 
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace USBAnywhere.Server.Services;
@@ -13,6 +14,22 @@ namespace USBAnywhere.Server.Services;
 /// </summary>
 public static class SecurityHelper
 {
+    public static bool IsValidBindAddress(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return true;
+        var s = value.Trim();
+        if (s is "0.0.0.0" or "::" or "*" or "any") return true;
+        return IPAddress.TryParse(s, out _);
+    }
+
+    public static IPAddress ResolveBindAddress(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return IPAddress.Any;
+        var s = value.Trim();
+        if (s is "0.0.0.0" or "*" or "any") return IPAddress.Any;
+        if (s == "::") return IPAddress.IPv6Any;
+        return IPAddress.TryParse(s, out var addr) ? addr : IPAddress.Any;
+    }
     public static bool IsValidBusId(string? busId)
     {
         if (string.IsNullOrWhiteSpace(busId)) return false;

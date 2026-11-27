@@ -26,6 +26,9 @@ public class DiscoveryResponderService : IDisposable
     private readonly UsbipdService? _usbipdService;
     private readonly Action? _onStateChanged;
     private readonly int _port;
+    private readonly string? _bindAddressOverride;
+    private readonly PairingService _pairingService;
+    private readonly Func<string?>? _tlsFingerprintProvider;
     private readonly SemaphoreSlim _clientConcurrency = new(8, 8);
     private UdpClient? _udpClient;
     private TcpListener? _tcpListener;
@@ -33,26 +36,50 @@ public class DiscoveryResponderService : IDisposable
     private bool _isDisposed;
 
     public int Port => (_tcpListener?.LocalEndpoint as IPEndPoint)?.Port ?? _port;
+    public IPAddress BoundAddress { get; private set; } = IPAddress.Any;
+    public PairingService Pairing => _pairingService;
 
-    public DiscoveryResponderService(UsbipdService? usbipdService = null, Action? onStateChanged = null, int port = CONTROL_PORT)
+    public DiscoveryResponderService(
+        UsbipdService? usbipdService = null,
+        Action? onStateChanged = null,
+        int port = CONTROL_PORT,
+        string? bindAddress = null,
+        PairingService? pairingService = null,
+        Func<string?>? tlsFingerprintProvider = null)
     {
         _usbipdService = usbipdService;
         _onStateChanged = onStateChanged;
         _port = port;
+        _bindAddressOverride = bindAddress;
+        _pairingService = pairingService ?? new PairingService();
+        _tlsFingerprintProvider = tlsFingerprintProvider;
     }
 
     public void Start()
     {
         if (_cts != null) return;
         _cts = new CancellationTokenSource();
+        var targetIp = SecurityHelper.ResolveBindAddress(_bindAddressOverride ?? SettingsService.Current.BindAddress);
+        BoundAddress = targetIp;
 
         try
         {
-            _udpClient = new UdpClient();
+            _udpClient = new UdpClient(targetIp.AddressFamily);
             _udpClient.ExclusiveAddressUse = true;
-            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _port));
+            try
+            {
+                _udpClient.Client.Bind(new IPEndPoint(targetIp, _port));
+            }
+            catch (SocketException) when (!Equals(targetIp, IPAddress.Any))
+            {
+                _udpClient.Dispose();
+                _udpClient = new UdpClient();
+                _udpClient.ExclusiveAddressUse = true;
+                _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, _port));
+                BoundAddress = IPAddress.Any;
+            }
             Task.Run(() => ListenUdpLoopAsync(_cts.Token));
-            LogService.Info($"Discovery responder listening on UDP port {_port}");
+            LogService.Info($"Discovery responder listening on UDP {BoundAddress}:{_port}");
         }
         catch (Exception ex)
         {
@@ -61,16 +88,34 @@ public class DiscoveryResponderService : IDisposable
 
         try
         {
-            _tcpListener = new TcpListener(IPAddress.Any, _port);
+            var listenIp = targetIp;
+            _tcpListener = new TcpListener(listenIp, _port);
             _tcpListener.ExclusiveAddressUse = true;
-            _tcpListener.Start();
+            try
+            {
+                _tcpListener.Start();
+            }
+            catch (SocketException) when (!Equals(listenIp, IPAddress.Any))
+            {
+                _tcpListener = new TcpListener(IPAddress.Any, _port);
+                _tcpListener.ExclusiveAddressUse = true;
+                _tcpListener.Start();
+                listenIp = IPAddress.Any;
+            }
+            BoundAddress = listenIp;
             Task.Run(() => ListenTcpLoopAsync(_cts.Token));
-            LogService.Info($"Dynamic Control API listening on TCP port {Port}");
+            LogService.Info($"Dynamic Control API listening on TCP {BoundAddress}:{Port}");
         }
         catch (Exception ex)
         {
             LogService.Warn($"Could not start Dynamic Control API on TCP {_port}: {ex.Message}");
         }
+    }
+
+    public void Restart()
+    {
+        Stop();
+        Start();
     }
 
     private async Task ListenUdpLoopAsync(CancellationToken token)
@@ -146,17 +191,7 @@ public class DiscoveryResponderService : IDisposable
                     client.Client.RemoteEndPoint is IPEndPoint remoteEp &&
                     !IPAddress.IsLoopback(remoteEp.Address))
                 {
-                    var remoteIp = remoteEp.Address.ToString();
-                    if (SettingsService.Current.WhitelistedIPs.Count == 0 ||
-                        !SettingsService.Current.WhitelistedIPs.Contains(remoteIp, StringComparer.OrdinalIgnoreCase))
-                    {
-                        await WriteJsonAsync(client.GetStream(), new
-                        {
-                            status = "DENIED",
-                            message = $"Client IP {remoteIp} is not in server whitelist"
-                        }, cts.Token);
-                        return;
-                    }
+                    // Allow PAIR before IP whitelist check when an active code exists
                 }
 
                 var stream = client.GetStream();
@@ -176,7 +211,85 @@ public class DiscoveryResponderService : IDisposable
                 var line = (newlineIdx >= 0 ? rawText[..newlineIdx] : rawText).Trim();
                 if (string.IsNullOrEmpty(line)) return;
 
+                var preParts = line.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
+                var preCmd = preParts[0].ToUpperInvariant();
+                if (preCmd == "PAIR" && preParts.Length >= 2)
+                {
+                    if (_pairingService.TryRedeem(preParts[1]))
+                    {
+                        var remoteIp = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString();
+                        if (!string.IsNullOrWhiteSpace(remoteIp) &&
+                            SettingsService.Current.WhitelistEnabled &&
+                            !SettingsService.Current.WhitelistedIPs.Contains(remoteIp, StringComparer.OrdinalIgnoreCase))
+                        {
+                            SettingsService.Current.WhitelistedIPs.Add(remoteIp);
+                        }
+                        if (string.IsNullOrWhiteSpace(SettingsService.Current.ControlToken))
+                        {
+                            SettingsService.Current.ControlToken = PairingService.GenerateControlToken();
+                        }
+                        SettingsService.Save();
+                        var fp = _tlsFingerprintProvider?.Invoke() ?? "";
+                        await WriteJsonAsync(stream, new
+                        {
+                            status = "OK",
+                            server = Environment.MachineName,
+                            token = SettingsService.Current.ControlToken,
+                            usbip_port = 3240,
+                            tls_port = SettingsService.Current.TlsPort,
+                            tls_fingerprint = fp
+                        }, cts.Token);
+                    }
+                    else
+                    {
+                        await WriteJsonAsync(stream, new { status = "DENIED", message = "Invalid or expired pairing code" }, cts.Token);
+                    }
+                    return;
+                }
+
+                if (SettingsService.Current.WhitelistEnabled &&
+                    client.Client.RemoteEndPoint is IPEndPoint wlEp &&
+                    !IPAddress.IsLoopback(wlEp.Address))
+                {
+                    var remoteIp = wlEp.Address.ToString();
+                    if (SettingsService.Current.WhitelistedIPs.Count == 0 ||
+                        !SettingsService.Current.WhitelistedIPs.Contains(remoteIp, StringComparer.OrdinalIgnoreCase))
+                    {
+                        await WriteJsonAsync(stream, new
+                        {
+                            status = "DENIED",
+                            message = $"Client IP {remoteIp} is not in server whitelist"
+                        }, cts.Token);
+                        return;
+                    }
+                }
+
                 var parts = line.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                var expectedTok = (SettingsService.Current.ControlToken ?? "").Trim();
+                if (!string.IsNullOrEmpty(expectedTok))
+                {
+                    if (parts.Length >= 2 && string.Equals(parts[0], "TOKEN", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var tokAndRest = parts[1].Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                        if (tokAndRest.Length >= 2 &&
+                            System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
+                                Encoding.UTF8.GetBytes(tokAndRest[0]),
+                                Encoding.UTF8.GetBytes(expectedTok)))
+                        {
+                            parts = tokAndRest[1].Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                        }
+                        else
+                        {
+                            await WriteJsonAsync(stream, new { status = "DENIED", message = "Invalid control token" }, cts.Token);
+                            return;
+                        }
+                    }
+                    else if (!(client.Client.RemoteEndPoint is IPEndPoint epLoop && IPAddress.IsLoopback(epLoop.Address)))
+                    {
+                        await WriteJsonAsync(stream, new { status = "DENIED", message = "Control token required" }, cts.Token);
+                        return;
+                    }
+                }
                 var cmd = parts[0].ToUpperInvariant();
                 var arg = parts.Length > 1 ? parts[1].Trim() : "";
 
@@ -189,7 +302,8 @@ public class DiscoveryResponderService : IDisposable
                         foreach (var d in devs)
                         {
                             var tag = d.IsExported ? $"[{d.Status}]" : "[Local]";
-                            lines.Add($"{d.BusId} : {d.DisplayName} {tag} ({d.VidPid.ToLowerInvariant()})");
+                            var revTag = string.IsNullOrEmpty(d.Revision) ? "" : $" [Rev:{d.Revision}]";
+                            lines.Add($"{d.BusId} : {d.DisplayName} {tag} ({d.VidPid.ToLowerInvariant()}){revTag}");
                         }
                     }
                     await WriteJsonAsync(stream, new { status = "OK", devices = lines }, cts.Token);

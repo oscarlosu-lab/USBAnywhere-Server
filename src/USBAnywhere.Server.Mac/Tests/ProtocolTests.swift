@@ -152,4 +152,50 @@ final class ProtocolTests: XCTestCase {
         XCTAssertGreaterThan(prodDesc.count, 4)
         XCTAssertEqual(prodDesc[1], 3) // USB_DT_STRING
     }
+
+    func testMacUpdateCheckerSemVerAndShaSums() {
+        XCTAssertTrue(MacUpdateChecker.isNewerVersion(latest: "v3.5.0", current: "3.4.0"))
+        XCTAssertFalse(MacUpdateChecker.isNewerVersion(latest: "3.4.0", current: "3.4.0"))
+        let sums = MacUpdateChecker.parseSha256Sums(
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef  USBAnywhere-Server-macOS.dmg\n"
+        )
+        XCTAssertEqual(sums["USBAnywhere-Server-macOS.dmg"]?.count, 64)
+    }
+
+    func testVirtualMacMicDescriptorAndRingBuffer() {
+        let mic = VirtualMacMicDevice()
+        let dev = mic.buildDeviceDescriptor()
+        XCTAssertEqual(dev.count, 18)
+        let cfg = mic.buildUac1ConfigDescriptor()
+        XCTAssertGreaterThanOrEqual(cfg.count, 36)
+        mic.pushPcmFrame(Data([0x11, 0x22, 0x33, 0x44]))
+        XCTAssertEqual(mic.readFrame(byteCount: 4), Data([0x11, 0x22, 0x33, 0x44]))
+    }
+
+    private final class MockTransport: USBDeviceTransport {
+        func controlTransfer(bmRequestType: UInt8, bRequest: UInt8, wValue: UInt16, wIndex: UInt16, data: Data?, maxLength: Int) -> Data? {
+            return Data([0xAA, 0xBB])
+        }
+        func bulkOrInterruptTransfer(endpoint: UInt8, direction: UInt32, data: Data?, maxLength: Int) -> Data? {
+            return Data([0xCC, 0xDD, 0xEE])
+        }
+        func close() {}
+    }
+
+    func testURBHandlerDelegatesToTransport() {
+        let dev = USBDeviceInfo(
+            busId: "1-9", path: "/usb/1-9", busNum: 1, devNum: 9,
+            speed: USBIPConstants.speedHigh, idVendor: 0x1209, idProduct: 0x5541,
+            bcdDevice: 0x0100, bDeviceClass: 0, bDeviceSubClass: 0, bDeviceProtocol: 0,
+            bConfigurationValue: 1, bNumConfigurations: 1, bNumInterfaces: 1
+        )
+        let handler = URBHandler(device: dev, transport: MockTransport())
+        let cmd = USBIPPackets.CmdSubmit(
+            seqnum: 7, devid: 1, direction: USBIPConstants.dirIn, ep: 1,
+            transferFlags: 0, transferBufferLength: 3, startFrame: 0,
+            numberOfPackets: 0, interval: 0, setup: Data(), transferBuffer: Data()
+        )
+        let reply = handler.handleSubmit(cmd: cmd)
+        XCTAssertEqual(reply.suffix(3), Data([0xCC, 0xDD, 0xEE]))
+    }
 }

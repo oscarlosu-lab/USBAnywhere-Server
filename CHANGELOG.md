@@ -1,5 +1,17 @@
 # CHANGELOG - USBAnywhere Server
 
+## [3.5.0] - 2026-11-27
+
+### Added
+- **Unified `PAIR` / `TOKEN` Endpoint & Optional TLS 1.3 Tunnel (`PairingService`, `TlsTunnelService`)**:
+  - Added single-use 6-digit pairing codes (5-minute TTL, 5-failure lockout), `BindAddress` TCP/UDP/firewall scoping (`3240, 3241, 3243`), TLS SHA-256 fingerprint advertisement, and `Rev` hardware revision column (`[Rev:XXXX]`) in Windows Server UI and `LIST`.
+- **Windows Wake-from-Sleep Sync & Multi-Session Isolation (`SessionIsolationService`)**:
+  - Automatically re-synchronizes USB inventory on `PowerModes.Resume` and enforces WTS session isolation settings.
+- **macOS `IOUSBHost` Real USB Transport, Virtual UAC1 Mac Mic & Updater (`IOUSBHostSession.swift`, `VirtualMacMicDevice.swift`, `MacUpdateChecker.swift`)**:
+  - Implemented `IOUSBHostDevice`/`IOUSBHostInterface` pipe transfers, `AVAudioEngine` 48 kHz mono virtual microphone capture, `BindAddress` support in `USBIPServer.swift`, and SHA-256 GitHub Releases updater.
+- **Synced Linux Control Suite & MCP Server (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**:
+  - Added pairing (`pair --json`), TLS tunnel (`tls-tunnel`), automatic USB autosuspend protection, `bind_address` systemd drop-ins, `--reset`, `--json` diagnostics, and 6-tool stdio MCP server.
+
 ## [3.4.0] - 2026-11-26
 
 ### Added

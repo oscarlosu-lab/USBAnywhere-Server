@@ -110,7 +110,10 @@ USBAnywhere Server for macOS includes both an interactive command-line interface
 - **Auto-Bind Engine**: Automatically re-exports remembered USB peripherals by hardware signature whenever reconnected.
 - **Menu Bar Extra (`NSStatusItem`)**: Quick system tray controls to monitor shared devices, toggle all exports, and copy host IP directly from the macOS status bar.
 - **Multi-Tier Auto-Discovery**: Integrated UDP 3241 responder and Bonjour mDNS publishing (`_usbanywhere._tcp`) for zero-configuration discovery by Windows and Android clients.
-- **Control API Security & UAS Warning (`v3.4.0`)**: `ControlServer.swift` supports optional IP allowlist and `control_token` verification on TCP `3241`, and `USBIPServer.swift` flags UAS storage devices.
+- **Control API Security & UAS Warning (`v3.5.0`)**: `ControlServer.swift` supports optional IP allowlist and `control_token` verification on TCP `3241`, and `USBIPServer.swift` flags UAS storage devices.
+- **Real `IOUSBHost` User-Space USB Transport (`v3.5.0`)**: `IOUSBHostSession.swift` bridges control, bulk, and interrupt URBs directly through macOS `IOUSBHost` (`[.deviceCapture]`) without kernel extensions.
+- **Virtual UAC1 Microphone & `BindAddress` Scoping (`v3.5.0`)**: `VirtualMacMicDevice.swift` captures 48 kHz/16-bit PCM audio via `AVAudioEngine`, and `USBIPServer` supports explicit `bindAddress` scoping (default `0.0.0.0`).
+- **SHA-256 Verified Updater (`v3.5.0`)**: `MacUpdateChecker.swift` checks GitHub Releases and validates `SHA256SUMS.txt` via `CryptoKit`.
 
 ---
 

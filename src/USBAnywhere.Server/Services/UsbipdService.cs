@@ -19,8 +19,24 @@ public class UsbipdService : IDisposable
 {
     private string _usbipdPath = "usbipd.exe";
     private Dictionary<string, string> _wmiDeviceCache = new();
+    private Dictionary<string, string> _wmiRevCache = new();
     private DateTime _lastWmiCacheUpdate = DateTime.MinValue;
     private readonly object _wmiCacheLock = new();
+
+    public void InvalidateWmiCache()
+    {
+        lock (_wmiCacheLock)
+        {
+            _lastWmiCacheUpdate = DateTime.MinValue;
+        }
+    }
+
+    public static string ExtractRevisionFromDeviceId(string? deviceId)
+    {
+        if (string.IsNullOrWhiteSpace(deviceId)) return "";
+        var m = Regex.Match(deviceId, @"REV_([0-9A-Fa-f]{4})");
+        return m.Success ? m.Groups[1].Value.ToUpperInvariant() : "";
+    }
 
     public event EventHandler<string>? LogMessage;
     public bool IsUsbipdAvailable { get; private set; }
@@ -152,11 +168,16 @@ public class UsbipdService : IDisposable
 
                     var vidPidKey = $"{vid:X4}:{pid:X4}";
                     string enrichedName = baseName;
+                    string rev = "";
                     lock (_wmiCacheLock)
                     {
                         if (_wmiDeviceCache.TryGetValue(vidPidKey, out var wmiName))
                         {
                             enrichedName = wmiName;
+                        }
+                        if (_wmiRevCache.TryGetValue(vidPidKey, out var wmiRev))
+                        {
+                            rev = wmiRev;
                         }
                     }
 
@@ -168,6 +189,7 @@ public class UsbipdService : IDisposable
                         BusId = match.Groups[1].Value,
                         VendorId = vid,
                         ProductId = pid,
+                        Revision = rev,
                         Name = enrichedName,
                         Description = baseName,
                         Status = rawState,
@@ -203,6 +225,7 @@ public class UsbipdService : IDisposable
             try
             {
                 var newCache = new Dictionary<string, string>();
+                var newRevCache = new Dictionary<string, string>();
                 using var searcher = new System.Management.ManagementObjectSearcher(
                     "SELECT DeviceID, Name, Caption FROM Win32_PnPEntity WHERE DeviceID LIKE 'USB%'");
 
@@ -214,12 +237,17 @@ public class UsbipdService : IDisposable
                     var vidMatch = Regex.Match(deviceId, @"VID_([0-9A-Fa-f]{4})");
                     var pidMatch = Regex.Match(deviceId, @"PID_([0-9A-Fa-f]{4})");
 
-                    if (vidMatch.Success && pidMatch.Success && !string.IsNullOrWhiteSpace(name))
+                    if (vidMatch.Success && pidMatch.Success)
                     {
                         var key = $"{vidMatch.Groups[1].Value.ToUpperInvariant()}:{pidMatch.Groups[1].Value.ToUpperInvariant()}";
-                        if (!newCache.ContainsKey(key) || name.Length > newCache[key].Length)
+                        if (!string.IsNullOrWhiteSpace(name) && (!newCache.ContainsKey(key) || name.Length > newCache[key].Length))
                         {
                             newCache[key] = name;
+                        }
+                        var rev = ExtractRevisionFromDeviceId(deviceId);
+                        if (!string.IsNullOrEmpty(rev) && !newRevCache.ContainsKey(key))
+                        {
+                            newRevCache[key] = rev;
                         }
                     }
                 }
@@ -227,6 +255,7 @@ public class UsbipdService : IDisposable
                 lock (_wmiCacheLock)
                 {
                     _wmiDeviceCache = newCache;
+                    _wmiRevCache = newRevCache;
                     _lastWmiCacheUpdate = DateTime.Now;
                 }
             }

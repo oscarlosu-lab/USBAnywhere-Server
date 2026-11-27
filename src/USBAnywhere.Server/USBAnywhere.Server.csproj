@@ -10,10 +10,10 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>USBAnywhere-Server</AssemblyName>
     <RootNamespace>USBAnywhere.Server</RootNamespace>
-    <Version>3.4.0</Version>
-    <AssemblyVersion>3.4.0.0</AssemblyVersion>
-    <FileVersion>3.4.0.0</FileVersion>
-    <InformationalVersion>3.4.0</InformationalVersion>
+    <Version>3.5.0</Version>
+    <AssemblyVersion>3.5.0.0</AssemblyVersion>
+    <FileVersion>3.5.0.0</FileVersion>
+    <InformationalVersion>3.5.0</InformationalVersion>
     <Company>oscarlosu-lab</Company>
     <Authors>oscarlosu-lab</Authors>
     <Copyright>Copyright (c) 2025-2026 oscarlosu-lab</Copyright>

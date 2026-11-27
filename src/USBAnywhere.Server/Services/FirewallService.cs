@@ -20,7 +20,35 @@ public static class FirewallService
     private const string LegacyRuleName = "SnakeUSBIP Server (TCP 3240)";
     private const int Port = 3240;
     private const int DiscoveryPort = 3241;
+    private const int TlsPort = 3243;
     private static readonly string NetshPath = Path.Combine(Environment.SystemDirectory, "netsh.exe");
+
+    public static string BuildTcpRuleArguments(string ruleName, string remoteIpClause, string? bindAddress = null, bool includeTlsPort = true)
+    {
+        var ports = includeTlsPort ? $"{Port},{DiscoveryPort},{TlsPort}" : $"{Port},{DiscoveryPort}";
+        var localIpClause = "";
+        if (!string.IsNullOrWhiteSpace(bindAddress) &&
+            SecurityHelper.IsValidBindAddress(bindAddress) &&
+            !string.Equals(bindAddress.Trim(), "0.0.0.0", StringComparison.Ordinal) &&
+            !string.Equals(bindAddress.Trim(), "::", StringComparison.Ordinal))
+        {
+            localIpClause = $" localip={bindAddress.Trim()}";
+        }
+        return $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=allow protocol=tcp localport={ports}{localIpClause} profile=private,domain {remoteIpClause}";
+    }
+
+    public static string BuildUdpRuleArguments(string ruleName, string remoteIpClause, string? bindAddress = null)
+    {
+        var localIpClause = "";
+        if (!string.IsNullOrWhiteSpace(bindAddress) &&
+            SecurityHelper.IsValidBindAddress(bindAddress) &&
+            !string.Equals(bindAddress.Trim(), "0.0.0.0", StringComparison.Ordinal) &&
+            !string.Equals(bindAddress.Trim(), "::", StringComparison.Ordinal))
+        {
+            localIpClause = $" localip={bindAddress.Trim()}";
+        }
+        return $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=allow protocol=udp localport={DiscoveryPort}{localIpClause} profile=private,domain {remoteIpClause}";
+    }
 
     public static bool IsRuleConfigured()
     {
@@ -98,10 +126,9 @@ public static class FirewallService
                 remoteIpClause = "remoteip=localsubnet,100.64.0.0/10,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16";
             }
 
-            var inboundResult = await RunNetshCommandAsync(
-                $"advfirewall firewall add rule name=\"{RuleName}\" dir=in action=allow protocol=tcp localport={Port},{DiscoveryPort} profile=private,domain {remoteIpClause}");
-            await RunNetshCommandAsync(
-                $"advfirewall firewall add rule name=\"{RuleNameUdp}\" dir=in action=allow protocol=udp localport={DiscoveryPort} profile=private,domain {remoteIpClause}");
+            var bindAddr = SettingsService.Current.BindAddress;
+            var inboundResult = await RunNetshCommandAsync(BuildTcpRuleArguments(RuleName, remoteIpClause, bindAddr, includeTlsPort: true));
+            await RunNetshCommandAsync(BuildUdpRuleArguments(RuleNameUdp, remoteIpClause, bindAddr));
 
             if (!inboundResult)
             {

@@ -14,13 +14,15 @@ import Glibc
 
 public final class USBIPServer {
     private let port: UInt16
+    private let bindAddress: String
     private var serverSocket: Int32 = -1
     private var isRunning: Bool = false
     private let dispatchQueue = DispatchQueue(label: "com.usbanywhere.server.mac", attributes: .concurrent)
     public var onLog: ((String) -> Void)?
     
-    public init(port: UInt16 = USBIPConstants.defaultPort) {
+    public init(port: UInt16 = USBIPConstants.defaultPort, bindAddress: String = "0.0.0.0") {
         self.port = port
+        self.bindAddress = bindAddress
     }
     
     private func emitLog(_ msg: String) {
@@ -40,7 +42,12 @@ public final class USBIPServer {
         var addr = sockaddr_in()
         addr.sin_family = sa_family_t(AF_INET)
         addr.sin_port = port.bigEndian
-        addr.sin_addr.s_addr = in_addr_t(0) // INADDR_ANY
+        var parsedAddr = in_addr()
+        if inet_pton(AF_INET, bindAddress, &parsedAddr) == 1 {
+            addr.sin_addr = parsedAddr
+        } else {
+            addr.sin_addr.s_addr = in_addr_t(0)
+        }
         
         let bindResult = withUnsafePointer(to: &addr) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
@@ -67,7 +74,7 @@ public final class USBIPServer {
         DiscoveryResponder.shared.start()
         BonjourPublisher.shared.start(port: Int(port))
 
-        emitLog("🌐 USBAnywhere Server (macOS v3.4.0) listening on 0.0.0.0:\(port)")
+        emitLog("🌐 USBAnywhere Server (macOS v3.5.0) listening on 0.0.0.0:\(port)")
         emitLog("⚡ Dynamic Control API & Discovery active on TCP/UDP port 3241")
         
         while isRunning {

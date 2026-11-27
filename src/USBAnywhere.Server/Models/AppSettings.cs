@@ -28,12 +28,17 @@ public class AppSettings
     public List<string> WhitelistedIPs { get; set; } = new();
     public bool RequirePIN { get; set; } = false;
     public string PIN { get; set; } = "";
+    public string ControlToken { get; set; } = "";
 
     // NETWORK
     public bool FirewallConfigured { get; set; } = false;
+    public string BindAddress { get; set; } = "";
+    public bool TlsTunnelEnabled { get; set; } = false;
+    public int TlsPort { get; set; } = 3243;
 
     // ADVANCED
     public int RefreshIntervalSeconds { get; set; } = 3;
     public int WmiCacheDurationSeconds { get; set; } = 30;
     public string WebhookUrl { get; set; } = "";
+    public bool EnforceSessionIsolation { get; set; } = true;
 }

@@ -8,20 +8,43 @@ import Foundation
 
 public final class URBHandler {
     private let device: USBDeviceInfo
-    
-    public init(device: USBDeviceInfo) {
+    private let transport: USBDeviceTransport?
+
+    public init(device: USBDeviceInfo, transport: USBDeviceTransport? = nil) {
         self.device = device
+        self.transport = transport
     }
-    
+
     /// Processes an incoming USBIP_CMD_SUBMIT packet and returns the corresponding USBIP_RET_SUBMIT response
     public func handleSubmit(cmd: USBIPPackets.CmdSubmit) -> Data {
         let ep = cmd.ep
         let direction = cmd.direction
         let bufferLength = cmd.transferBufferLength
-        
+
         // Control Endpoint (EP 0)
         if ep == 0 {
+            if let tx = transport, cmd.setup.count >= 8 {
+                let bmReq = cmd.setup[0]
+                let bReq = cmd.setup[1]
+                let wVal = UInt16(cmd.setup[2]) | (UInt16(cmd.setup[3]) << 8)
+                let wIdx = UInt16(cmd.setup[4]) | (UInt16(cmd.setup[5]) << 8)
+                let wLen = Int(UInt16(cmd.setup[6]) | (UInt16(cmd.setup[7]) << 8))
+                if let realData = tx.controlTransfer(bmRequestType: bmReq, bRequest: bReq, wValue: wVal, wIndex: wIdx, data: cmd.transferBuffer, maxLength: wLen) {
+                    return USBIPPackets.encodeRetSubmit(
+                        seqnum: cmd.seqnum, devid: cmd.devid, direction: direction,
+                        ep: 0, status: 0, actualLength: UInt32(realData.count), transferData: realData
+                    )
+                }
+            }
             return handleControlTransfer(cmd: cmd)
+        }
+
+        if let tx = transport,
+           let realPayload = tx.bulkOrInterruptTransfer(endpoint: UInt8(ep & 0xFF), direction: direction, data: cmd.transferBuffer, maxLength: Int(bufferLength)) {
+            return USBIPPackets.encodeRetSubmit(
+                seqnum: cmd.seqnum, devid: cmd.devid, direction: direction,
+                ep: ep, status: 0, actualLength: UInt32(realPayload.count), transferData: realPayload
+            )
         }
         
         // Interrupt / Bulk In Transfers (Joysticks, Keyboards, Mice, Storage, Video)

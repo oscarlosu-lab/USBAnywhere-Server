@@ -112,6 +112,14 @@
                                VerticalAlignment="Center" Margin="15,0,0,0"
                                Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                 </StackPanel>
+                <TextBlock x:Name="lblBindAddress" Text="Bind interface IP (empty = all interfaces):"
+                           Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="0,6,0,2"/>
+                <TextBox x:Name="txtBindAddress" Padding="6,4"
+                         Background="{DynamicResource BgSecondary}"
+                         Foreground="{DynamicResource TextPrimary}"
+                         BorderBrush="{DynamicResource AccentColor}"
+                         ToolTip="Leave empty for all interfaces (0.0.0.0) or enter a specific LAN/VPN IP"/>
+                <CheckBox x:Name="chkTlsTunnel" Content="Enable TLS Encrypted Tunnel (Port 3243)" Margin="0,8,0,0"/>
                 
                 <!-- ADVANCED -->
                 <TextBlock x:Name="secAdvanced" Text="⚙️ ADVANCED" Style="{StaticResource SectionHeader}"/>

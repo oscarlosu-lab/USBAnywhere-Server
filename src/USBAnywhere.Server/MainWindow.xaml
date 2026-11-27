@@ -180,6 +180,7 @@
                         <DataGridTextColumn Header="🔌" Binding="{Binding Icon}" Width="35"/>
                         <DataGridTextColumn x:Name="colBusId" Header="Bus ID" Binding="{Binding BusId}" Width="65"/>
                         <DataGridTextColumn x:Name="colVidPid" Header="VID:PID" Binding="{Binding VidPid}" Width="90"/>
+                        <DataGridTextColumn x:Name="colRevision" Header="Rev" Binding="{Binding Revision}" Width="55"/>
                         <DataGridTemplateColumn x:Name="colDeviceName" Header="Device Name" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
