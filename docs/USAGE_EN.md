@@ -37,7 +37,7 @@
 ### Steps
 
 1. Download the latest release from [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Run `USBAnywhere-Server_Setup_v3.3.2.exe` (or `v3.4.0` RC) or extract `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
+2. Run `USBAnywhere-Server_Setup_v3.5.0.exe` or extract `USBAnywhere-Server-v3.5.0-x64-Portable.zip`
 
 ---
 
@@ -84,7 +84,9 @@ See [Troubleshooting Guide](TROUBLESHOOTING.md) or click **⚙️ Settings → �
 2. Click **🗑️ Uninstall Driver** if you wish to remove the `usbipd-win` system driver
 3. Use Windows Installed Apps to uninstall **USBAnywhere Server** (or delete the folder if using Portable mode)
 
-## Security & Compatibility (`v3.4.0`)
+## Security, Pairing & Compatibility (`v3.5.0`)
 
+- **6-Digit Pairing & Optional TLS 1.3 Tunnel (`TCP 3243`)**: `PairingService` and `TlsTunnelService` generate single-use 6-digit pairing codes (5-minute TTL, 5-failure lockout), advertise SHA-256 certificate fingerprints, and scope `3240, 3241, 3243` listeners/firewall rules via `BindAddress`.
+- **Wake-from-Sleep Sync, `[Rev:XXXX]` & WTS Isolation**: Automatically re-synchronizes USB devices after Windows resume, displays hardware `Rev` in the Server UI, and enforces WTS session isolation.
 - **IP Whitelist Hardening**: When an IP whitelist is configured, `DiscoveryResponderService` enforces the allowlist on TCP `3241` inventory requests as well as discovery probes.
-- **Linux/macOS Control API & UAS Notice**: `usbanywhere-ctl` supports optional `allowed_ips` and constant-time HMAC `control_token` authentication (`policy allow-ip|deny-ip|set-token|clear-token`) and warns before binding `uas` mass-storage drives.
+- **Linux/macOS Control API & MCP (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**: Supports `pair --json`, `tls-tunnel`, `allowed_ips`, constant-time HMAC `control_token`, loopback-only `PAIR_CREATE`, and `uas` storage notices.

@@ -37,7 +37,7 @@
 ### Pasos
 
 1. Descarga la última versión desde [GitHub Releases](https://github.com/oscarlosu-lab/USBAnywhere-Server/releases/latest)
-2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.3.2.exe` (o `v3.4.0` RC) o extrae el archivo `USBAnywhere-Server-v3.3.2-x64-Portable.zip`
+2. Ejecuta el instalador `USBAnywhere-Server_Setup_v3.5.0.exe` o extrae el archivo `USBAnywhere-Server-v3.5.0-x64-Portable.zip`
 
 ---
 
@@ -84,7 +84,9 @@ Consulta la [Guía de Solución de Problemas](TROUBLESHOOTING_ES.md) o entra en 
 2. Haz clic en **🗑️ Desinstalar Driver** si deseas eliminar también el controlador `usbipd-win`
 3. Desinstala **USBAnywhere Server** desde Configuración de Windows (o borra la carpeta si usas la versión Portable).
 
-## Seguridad y Compatibilidad (`v3.4.0`)
+## Seguridad, Emparejamiento y Compatibilidad (`v3.5.0`)
 
+- **Emparejamiento 6 Dígitos y Túnel TLS 1.3 (`TCP 3243`)**: `PairingService` y `TlsTunnelService` generan códigos de un solo uso (TTL 5 min, bloqueo tras 5 fallos), anuncian huella SHA-256 y acotan puertos `3240, 3241, 3243` mediante `BindAddress`.
+- **Sincronización tras Suspensión, `[Rev:XXXX]` y Aislamiento WTS**: Re-sincroniza periféricos al reanudar Windows, muestra columna `Rev` en la UI y respeta el aislamiento de sesión WTS.
 - **Lista Blanca de IPs**: Cuando está activa, `DiscoveryResponderService` valida la IP cliente también en las consultas de inventario por TCP `3241`.
-- **API de Control Linux/macOS y Aviso UAS**: `usbanywhere-ctl` añade `allowed_ips` opcional y autenticación por `control_token` HMAC (`policy allow-ip|deny-ip|set-token|clear-token`), además de detectar unidades externas `uas`.
+- **API de Control Linux/macOS y MCP (`usbanywhere-ctl`, `usbanywhere-mcp.py`)**: Incluye `pair --json`, `tls-tunnel`, `allowed_ips`, `control_token` HMAC, guardia loopback para `PAIR_CREATE` y avisos `uas`.

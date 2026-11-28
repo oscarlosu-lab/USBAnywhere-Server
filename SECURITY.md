@@ -4,14 +4,14 @@
 
 | Version | Supported | Status |
 | --- | --- | --- |
-| 3.4.0 | Yes | Latest Stable Release |
-| 3.3.x | Yes | Active Stable (Current: v3.3.2) |
-| < 3.3 | No | Unsupported |
+| 3.5.0 | Yes | Latest Stable Release |
+| 3.4.x | Yes | Active Stable |
+| < 3.4 | No | Unsupported |
 
 ## Security Model
-- **Windows Server**: Firewall rules for USB/IP (`TCP 3240`) and discovery/control (`UDP/TCP 3241`) are restricted to Private/Domain profiles, with optional IP whitelist enforcement (`DiscoveryResponderService.cs`) and `SecurityHelper.IsValidBusId()` input validation.
-- **macOS Server**: Uses Apple Userspace `IOKit.framework` without third-party `.kext` kernel extensions, plus optional IP allowlist and `control_token` verification in `ControlServer.swift`.
-- **Linux Server**: `usbanywhere-ctl` supports optional `allowed_ips` and constant-time HMAC `control_token` verification (`policy allow-ip|deny-ip|set-token|clear-token`) on TCP `3241`.
+- **Windows Server**: Firewall rules for USB/IP (`TCP 3240`), discovery/control (`UDP/TCP 3241`), and pinned TLS 1.3 (`TCP 3243`) are restricted to Private/Domain profiles and optional `BindAddress`, with IP whitelist enforcement, `PAIR` 6-digit lockout (5 attempts / 5-min TTL), and `SecurityHelper.IsValidBusId()` input validation.
+- **macOS Server**: Uses Apple Userspace `IOKit.framework` / `IOUSBHost` without third-party `.kext` kernel extensions, plus `BindAddress` scoping, optional IP allowlist, and `control_token` verification in `ControlServer.swift`.
+- **Linux Server**: `usbanywhere-ctl` restricts remote `PAIR_CREATE` to loopback unless `control_token` is set, persists pairing state with `0o600` permissions, and supports `allowed_ips` and constant-time HMAC `control_token` verification on TCP `3241`.
 - **Fail-Closed Updater**: Verifies installer `SHA256SUMS.txt` over HTTPS before execution.
 
 ## Reporting a Vulnerability
